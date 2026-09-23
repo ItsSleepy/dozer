@@ -78,6 +78,10 @@ Clip sharing discussion:
   -> install deploy/dozer.service.
 - 09:02:35 Dozer#8769 connected, webhook on 127.0.0.1:8095, watchdog started, "online" DM sent.
 
+### 09:52 UTC — First real use (Isaac, phone, from work)
+- Tested help, status, services, mc, who's on, weather, briefing — all routed correctly, no errors in the audit log.
+- Not yet exercised: restart (confirm flow), mc <command>, wake pc, idea, the LLM path.
+
 ### Open for Isaac
 - [ ] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [ ] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
