@@ -85,7 +85,8 @@ Clip sharing discussion:
 ### 11:03 UTC — Confirm flow + tracker (Isaac)
 - `restart nginx` -> Yes/No prompt -> confirmed in 3 s -> "Restarted nginx → active". sudo works from Dozer's process.
 - `idea test from dozer` -> added as #153 in Quality of life (test entry removed afterwards).
-- Still untested: mc <command>, wake pc, LLM path.
+- 11:04 `mc say hello from dozer` -> confirmed -> server log shows "[Server] hello from dozer". Console path verified end to end.
+- Still untested: wake pc, LLM path (both need Isaac at home).
 
 ### Open for Isaac
 - [ ] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
