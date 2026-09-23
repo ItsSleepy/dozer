@@ -82,6 +82,11 @@ Clip sharing discussion:
 - Tested help, status, services, mc, who's on, weather, briefing — all routed correctly, no errors in the audit log.
 - Not yet exercised: restart (confirm flow), mc <command>, wake pc, idea, the LLM path.
 
+### 11:03 UTC — Confirm flow + tracker (Isaac)
+- `restart nginx` -> Yes/No prompt -> confirmed in 3 s -> "Restarted nginx → active". sudo works from Dozer's process.
+- `idea test from dozer` -> added as #153 in Quality of life (test entry removed afterwards).
+- Still untested: mc <command>, wake pc, LLM path.
+
 ### Open for Isaac
 - [ ] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [ ] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
