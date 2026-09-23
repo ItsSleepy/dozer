@@ -1,0 +1,17 @@
+# Optional upgrade from the cron supervisor to a proper systemd service.
+# Install: sudo cp dozer.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#          && sudo systemctl enable --now dozer && crontab -r   (removes the cron supervisor)
+[Unit]
+Description=Dozer personal assistant
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=sleepy
+WorkingDirectory=/home/sleepy/dozer
+ExecStart=/home/sleepy/dozer/venv/bin/python main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

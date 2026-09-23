@@ -1,0 +1,7 @@
+#!/bin/sh
+# Restart-only wrapper for Dozer. Install: sudo install -m 755 dozer-restart /usr/local/bin/
+unit="$1"
+case "$unit" in
+  ""|*[!A-Za-z0-9@._-]*) echo "invalid unit name" >&2; exit 2 ;;
+esac
+exec /usr/bin/systemctl restart -- "$unit"

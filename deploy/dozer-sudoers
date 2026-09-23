@@ -1,0 +1,2 @@
+# Install: sudo install -m 440 dozer-sudoers /etc/sudoers.d/dozer && sudo visudo -c
+sleepy ALL=(root) NOPASSWD: /usr/local/bin/dozer-restart
