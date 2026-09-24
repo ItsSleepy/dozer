@@ -173,7 +173,7 @@ async def set_reminder(when: str, text: str) -> str:
     due, repeat = parsed
     items = load()
     rid = max((r["id"] for r in items), default=0) + 1
-    r = {"id": rid, "text": text.strip(), "due": due.isoformat(timespec="seconds"), "repeat": repeat,
+    r = {"id": rid, "text": text.strip(), "due": due.isoformat(timespec="minutes"), "repeat": repeat,
          "created": datetime.now(TZ).isoformat(timespec="minutes"), "done": False}
     items.append(r)
     save(items)
@@ -208,10 +208,10 @@ async def snooze(rid: int, minutes: int = 10) -> str:
             due = datetime.now(TZ) + timedelta(minutes=int(minutes))
             if r.get("repeat"):          # snoozing a repeating one creates a one-off copy
                 nid = max(x["id"] for x in items) + 1
-                items.append({**r, "id": nid, "due": due.isoformat(timespec="seconds"), "repeat": None, "done": False})
+                items.append({**r, "id": nid, "due": due.isoformat(timespec="minutes"), "repeat": None, "done": False})
                 rid = nid
             else:
-                r.update(due=due.isoformat(timespec="seconds"), done=False)
+                r.update(due=due.isoformat(timespec="minutes"), done=False)
             save(items)
             audit("reminder_snooze", id=rid, minutes=minutes)
             return f"Snoozed `#{rid}` until {_fmt(due)}."
