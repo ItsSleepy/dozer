@@ -29,6 +29,9 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `docker` · `docker restart <name>` (asks) · `ls <path>` · `read <file> [lines]`
 `help` — this list
 
+**Memory**
+`remember that …` · `what did I say about …` · `memories` · `forget <id>` · `forget <words>`
+
 **Reminders**
 `remind me in 20m to …` · `remind me at 18:00 to …` · `remind me tomorrow at 9 to …`
 `remind me on friday at 17:30 to …` · `remind me every day at 22:00 to …` · `reminders` · `cancel reminder <id>` · `snooze <id> 10m`
@@ -40,6 +43,12 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 _P = [
     (r"^(help|commands|\?)$", lambda m: Route("help")),
     (r"^(please )?remind me .+$", lambda m: Route("remind", {"text": m[0]})),
+    (r"^(?:please )?(?:remember|note|save)(?: that| this)?:?\s+(.+)$", lambda m: Route("remember", {"text": m[1]})),
+    (r"^(?:what did i (?:say|tell you) about|what do you (?:know|remember) about|recall|search memory for)\s+(.+?)\??$",
+     lambda m: Route("recall", {"query": m[1]})),
+    (r"^(memories|memory|what do you remember)\??$", lambda m: Route("list_memories")),
+    (r"^forget #?(\d+)$", lambda m: Route("forget_memory", {"rid": int(m[1])}, "memory")),
+    (r"^forget (?:about |that )?(.+)$", lambda m: Route("forget_search", {"text": m[1]})),
     (r"^(reminders|my reminders|list reminders)$", lambda m: Route("list_reminders")),
     (r"^(cancel|delete|remove) reminder #?(\d+)$", lambda m: Route("cancel_reminder", {"rid": int(m[2])})),
     (r"^snooze #?(\d+)(?: (\d+)\s*(m|min|mins|h|hr|hours?)?)?$", lambda m: Route("snooze_reminder",

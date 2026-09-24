@@ -252,6 +252,19 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Briefing lists today's reminders.
 - Test reminder #1 (call Chris, 20:00) cancelled so it wouldn't fire.
 
+### ~17:55 UTC — Memory
+- dozer/memory.py: SQLite data/memory.db, FTS5 with porter stemming ("passwords" finds "password", "owe" finds "owes").
+  Works without the brain. Duplicate notes rejected.
+- Commands: remember/note/save (that) …, what did I say about …, what do you know about …, recall …, memories,
+  forget <id> (confirm), forget <words> (single match -> confirm; several -> pick an id).
+- Brain: tools remember / recall / forget_memory (confirm); every brain question gets up to 4 relevant memories injected
+  into the system prompt; only saves when Isaac asks.
+- Test (throwaway DB, deleted afterwards): "when's the league match?" -> answered from memory and worked out it was
+  Thursday 19:54, i.e. starting in 6 min (correct). "does anyone owe me money?" -> Chris €20. "remember that …" via the
+  brain -> saved.
+- Reminder test #2 fired on time at 19:47 (reminder_fire, late=false). Seconds precision tried and reverted (Isaac:
+  minutes are fine). data/ removed from git.
+
 ### Open for Isaac
 - [x] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
 - [ ] Check the router doesn't forward port 25575.

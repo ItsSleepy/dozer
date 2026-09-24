@@ -268,6 +268,17 @@ async def handle(message: discord.Message):
         if parts and reminders.parse_when(parts[0]):
             return await send(dest, await tools.call("set_reminder", when=parts[0], text=parts[1]))
         r = None                     # vague time ("after dinner") -> let the brain interpret it
+    if r and r.label == "memory":
+        r.label = f"Forget memory #{r.args['rid']}?"
+    if r and r.tool == "forget_search":
+        hits = tools.memory.matches_for_forget(r.args["text"])
+        if not hits:
+            return await send(dest, f"Nothing in memory matches '{r.args['text']}'.")
+        if len(hits) > 1:
+            return await send(dest, "Which one? Reply `forget <id>`:\n" + "\n".join(f"`#{h[0]}` {h[1]}" for h in hits))
+        if not await confirm(dest, f"Forget `#{hits[0][0]}`: {hits[0][1]}?"):
+            return await send(dest, "Kept it.")
+        return await send(dest, await tools.call("forget_memory", rid=hits[0][0]))
     if r and r.tool == "schedules":
         return await send(dest, scheduler.describe())
     if r and r.tool == "schedule_add":
