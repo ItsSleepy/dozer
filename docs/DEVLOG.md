@@ -265,6 +265,21 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Reminder test #2 fired on time at 19:47 (reminder_fire, late=false). Seconds precision tried and reverted (Isaac:
   minutes are fine). data/ removed from git.
 
+### ~18:10 UTC — Web search + link summarising
+- SearXNG in Docker: container "searxng", --restart unless-stopped, bound to 127.0.0.1:8888 only, config
+  /home/sleepy/searxng/settings.yml (JSON format on, limiter off, random secret). Test query: 40 results (brave, google cse).
+- dozer/web.py: web_search(query, n) via SearXNG JSON; summarise_url(url, focus) — fetch, extract main text with
+  trafilatura 2.2.0, summarise in a separate brain call with NO tools (page = untrusted data), num_ctx 8192,
+  first 14k chars. Brain offline -> returns the start of the page instead.
+- Fetching identifies as "DozerBot/1.0 (…isaac-dev.eu)" first, browser UA only as fallback (Wikipedia 403'd the
+  browser UA; fixed). JS-only pages (counter-strike.net) -> honest "no readable text".
+- Safety: links resolving to private/loopback/link-local addresses are refused (tested 127.0.0.1:8081, the gaming PC
+  agent, localhost SearXNG).
+- Commands: search/google/look up <q>; summarise|tldr <link> [focus on …]; a bare link = summarise.
+  Brain tools web_search + summarise_url; prompt says use search for anything current and cite the link.
+- Tests: Wikipedia Wake-on-LAN summary 8.9 s; "what changed in the latest CS2 update?" -> brain searched and answered
+  with the source link (9.6 s).
+
 ### Open for Isaac
 - [x] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
 - [ ] Check the router doesn't forward port 25575.

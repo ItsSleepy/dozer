@@ -290,10 +290,11 @@ REGISTRY = {
 }
 
 
-from . import ops, medal, pcagent, reminders, memory  # noqa: E402  (after _run/UNIT_RE are defined)
+from . import ops, medal, pcagent, reminders, memory, web  # noqa: E402  (after _run/UNIT_RE are defined)
 REGISTRY.update(ops.OPS)
 REGISTRY.update({"medal_clips": medal.medal_clips, "post_clip": medal.post_clip})
 REGISTRY.update(pcagent.AGENT_TOOLS)
+REGISTRY.update({"web_search": web.web_search, "summarise_url": web.summarise_url})
 REGISTRY.update({"remember": memory.remember, "recall": memory.recall, "forget_memory": memory.forget,
                  "list_memories": memory.list_memories})
 REGISTRY.update({"set_reminder": reminders.set_reminder, "list_reminders": reminders.list_reminders,

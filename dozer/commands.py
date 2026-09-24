@@ -29,6 +29,9 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `docker` · `docker restart <name>` (asks) · `ls <path>` · `read <file> [lines]`
 `help` — this list
 
+**Web**
+`search <query>` — web results · `summarise <link> [focus on …]` / `tldr <link>` / just paste a link
+
 **Memory**
 `remember that …` · `what did I say about …` · `memories` · `forget <id>` · `forget <words>`
 
@@ -43,6 +46,10 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 _P = [
     (r"^(help|commands|\?)$", lambda m: Route("help")),
     (r"^(please )?remind me .+$", lambda m: Route("remind", {"text": m[0]})),
+    (r"^(?:search|google|look up|lookup)\s+(.+)$", lambda m: Route("web_search", {"query": m[1]})),
+    (r"^(?:summari[sz]e|tldr|tl;dr|sum up)\s+(?:this\s+)?(https?://\S+)(?:\s+(?:focus(?: on)?|about)\s+(.+))?$",
+     lambda m: Route("summarise_url", {"url": m[1], "focus": m[2] or ""})),
+    (r"^<?(https?://\S+?)>?$", lambda m: Route("summarise_url", {"url": m[1]})),
     (r"^(?:please )?(?:remember|note|save)(?: that| this)?:?\s+(.+)$", lambda m: Route("remember", {"text": m[1]})),
     (r"^(?:what did i (?:say|tell you) about|what do you (?:know|remember) about|recall|search memory for)\s+(.+?)\??$",
      lambda m: Route("recall", {"query": m[1]})),
