@@ -1,5 +1,6 @@
 """Ollama client with tool calling. The model runs on the gaming PC."""
 import json
+import re
 
 import aiohttp
 
@@ -55,6 +56,24 @@ async def chat(messages: list, tools: bool = True) -> dict:
     return msg
 
 
+_TEXT_CALL = re.compile(r'\{\s*"name"\s*:\s*"([a-z_]+)"\s*,\s*"arguments"\s*:\s*(\{[^{}]*\})\s*\}')
+_KNOWN = {t["function"]["name"] for t in TOOL_SCHEMAS}
+
+
+def _text_tool_calls(content: str) -> list:
+    """Fallback: some models write tool calls as JSON text instead of using the API field."""
+    calls = []
+    for name, args in _TEXT_CALL.findall(content or ""):
+        if name in _KNOWN:
+            try:
+                calls.append({"function": {"name": name, "arguments": json.loads(args)}})
+            except json.JSONDecodeError:
+                pass
+    if calls:
+        audit("llm_text_tool_calls", count=len(calls), names=[c["function"]["name"] for c in calls])
+    return calls
+
+
 async def run(history: list, user_text: str, execute_tool) -> str:
     """Agent loop: model -> tools -> model, max 5 rounds.
     execute_tool(name, args) handles confirmation and returns a result string."""
@@ -62,7 +81,9 @@ async def run(history: list, user_text: str, execute_tool) -> str:
                 {"role": "user", "content": user_text}]
     for _ in range(5):
         msg = await chat(messages)
-        calls = msg.get("tool_calls") or []
+        calls = msg.get("tool_calls") or _text_tool_calls(msg.get("content", ""))
+        if calls and not msg.get("tool_calls"):
+            msg = {"role": "assistant", "content": "", "tool_calls": calls}
         if not calls:
             return msg.get("content", "").strip() or "(no reply)"
         messages.append(msg)

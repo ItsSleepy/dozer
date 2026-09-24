@@ -88,8 +88,18 @@ Clip sharing discussion:
 - 11:04 `mc say hello from dozer` -> confirmed -> server log shows "[Server] hello from dozer". Console path verified end to end.
 - Still untested: wake pc, LLM path (both need Isaac at home).
 
+### ~16:30 Malta — Brain online (Isaac at home)
+- Installed Ollama 0.34.4 on the gaming PC (192.168.1.84; other IPv4s are virtual adapters).
+- First launch bound to 127.0.0.1 only — OLLAMA_HOST (User) not picked up by the tray app. Fix: set OLLAMA_HOST=0.0.0.0 at Machine level, kill + relaunch. Now reachable from the mini PC.
+- Firewall rule "Ollama (LAN only)" on 11434 for 192.168.1.0/24.
+- Pulled qwen2.5:14b (Q4_K_M, 9.0 GB, 32k context).
+- Test 1: qwen2.5:14b emitted tool calls as plain JSON text mixed with garbage tokens instead of the tool_calls field (known template quirk). 33.8 s incl. cold load.
+- Fix: llm.py fallback parser turns JSON tool calls in the text into real calls (logged as llm_text_tool_calls).
+- Test 2 (warm): "How is the server doing and is anyone on Minecraft?" -> get_health + mc_status + mc_players -> correct summary in 4.5 s.
+- Next: pull qwen3:14b and compare tool-calling reliability.
+
 ### Open for Isaac
-- [ ] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
+- [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [ ] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
 - [ ] Install deploy/dozer-restart + deploy/dozer-sudoers (restart any service). Also fix the stale php8.3-fpm sudoers rule -> php8.5-fpm.
 - [ ] Review + apply deploy/send-quote-webhook.md to api/send-quote.php.
