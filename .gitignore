@@ -3,3 +3,4 @@ venv/
 logs/
 __pycache__/
 deploy/send-quote-webhook.md
+data/
