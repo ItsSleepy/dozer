@@ -10,3 +10,5 @@ android/app/build/
 android/.tmp/
 *.apk
 *.jks
+android/app/src/main/jniLibs/
+android/app/src/main/assets/kws/

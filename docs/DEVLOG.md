@@ -304,9 +304,21 @@ Decision (Isaac): not Discord voice notes — a real "Hey Dozer" wake word on th
   tmpdir inside the project + in-process Kotlin compiler. Release keystore android/dozer-release.jks (password in .env).
 - Dozer-1.0.apk (6.4 MB, signed CN=Dozer, O=IV Studio, C=MT) sent to Isaac by Dozer DM with the token (spoiler).
 
+### ~22:30 UTC — Wake word: Picovoice -> sherpa-onnx (IN PROGRESS, paused for the night)
+- Picovoice sign-up rejected Isaac's email -> switched to sherpa-onnx keyword spotting (open source, no account, offline,
+  any phrase as text, no training).
+- Fetched to /home/sleepy/sherpa: sherpa-onnx v1.13.8 Android libs, KWS model zipformer-gigaspeech-3.3M (int8),
+  Kotlin API files. keywords-dozer.txt: HEY DOZER / HI DOZER / OK DOZER / HEY DOSER (BPE tokens via sentencepiece).
+- Desktop test (sherpa-onnx 1.13.8 Python, Piper clips): 3/3 wake phrases detected, 0/5 false triggers
+  ("hey doctor", "the dozer is parked outside", "hey there…", "hey dude…", "those are the rules"). Threshold 0.25.
+- Done so far in android/: Kotlin API copied (package com.k2fsa.sherpa.onnx), arm64-v8a jniLibs (31 MB), assets/kws
+  (5.1 MB, gitignored — re-copy from /home/sleepy/sherpa), new WakeWord.kt (AudioRecord 16 kHz -> spotter).
+- NEXT: DozerService — replace PorcupineManager with WakeWord (stop it before Recorder, restart after);
+  MainActivity — remove Picovoice key + .ppn import; app/build.gradle.kts — drop porcupine dependency,
+  abiFilters arm64-v8a, versionCode 2 / versionName 1.1; build; DM APK v1.1.
+
 ### Open for Isaac
 - [ ] Cloudflare DNS: A record dozer -> 69.6.57.87; install deploy/nginx-dozer.conf; certbot for dozer.isaac-dev.eu.
-- [ ] Picovoice: AccessKey + train "Hey Dozer" (Android) -> import .ppn in the app.
 - [ ] Install Dozer-1.0.apk, paste token + AccessKey, Test connection, Start listening, battery -> unrestricted.
 - [x] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
 - [ ] Check the router doesn't forward port 25575.
