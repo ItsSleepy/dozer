@@ -128,7 +128,8 @@ async def mc_backups() -> str:
 async def pc_status() -> str:
     code, _ = await _run("ping", "-c", "1", "-W", "1", C.PC_IP, timeout=5)
     brain = await brain_online()
-    return (f"Gaming PC: {'on' if code == 0 else 'off / unreachable'}\n"
+    on = code == 0 or brain          # Windows Firewall blocks ping by default; Ollama answering means it's on
+    return (f"Gaming PC: {'on' if on else 'off / unreachable'}\n"
             f"Brain (Ollama): {'online (' + C.OLLAMA_MODEL + ')' if brain else 'offline'}")
 
 

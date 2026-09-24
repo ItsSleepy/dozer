@@ -120,13 +120,14 @@ async def prune_backups(keep: int = 3) -> str:
 
 async def disk_usage(path: str = "/home/sleepy") -> str:
     p = Path(path).resolve()
+    df = psutil.disk_usage("/")
+    head = f"Disk: {df.free / 2**30:.0f} GB free of {df.total / 2**30:.0f} GB ({df.percent:.0f}% used)"
     if not any(p == r or r in p.parents for r in READ_ROOTS):
-        return "Path not allowed."
+        return head + f"\n(folder breakdown not available for {p})"
     code, out = await _run("du", "-xh", "--max-depth=1", str(p), timeout=120)
     lines = sorted((l for l in out.splitlines() if "\t" in l),
                    key=lambda l: _to_bytes(l.split("\t")[0]), reverse=True)[:12]
-    df = psutil.disk_usage("/")
-    return f"Disk: {df.free / 2**30:.0f} GB free of {df.total / 2**30:.0f} GB\n" + "\n".join(lines)
+    return head + "\n" + "\n".join(lines)
 
 
 def _to_bytes(h: str) -> float:

@@ -153,6 +153,13 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Side finding: models spotted a Minecraft crash on 23 Sep ~06:17 (systemd exit code 1); server running since.
   Flagged for Claude to investigate.
 
+### 15:38 UTC — Wake-on-LAN test
+- Isaac (PC on): "wake the pc up please" -> brain -> wake_pc -> "Wake-on-LAN packet sent." Same wakeonlan/MAC/broadcast as the Us bot's working WoL.
+  Full cold-boot flow (brain offline -> offer wake -> wait for Ollama -> answer) still to test with the PC off.
+- Bug found in the log: pc_status said "off / unreachable" while Ollama answered — Windows Firewall blocks ping.
+  Fix: PC counts as on if ping OR Ollama responds.
+- Bug: disk_usage("/") returned "Path not allowed." Fix: always returns free space; folder breakdown only for allowed folders.
+
 ### Open for Isaac
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
