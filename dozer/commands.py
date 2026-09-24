@@ -43,6 +43,7 @@ _P = [
     (r"^(status|health|box|how'?s the (box|server))\??$", lambda m: Route("get_health")),
     (r"^services?$", lambda m: Route("get_services")),
     (r"^logs? ([\w@.-]+)(?: (\d+))?$", lambda m: Route("get_logs", {"unit": m[1], "lines": int(m[2] or 20)})),
+    (r"^restart (mc|minecraft|the server|eugh)$", lambda m: Route("mc_restart", {}, "Restart Minecraft? (warns players, saves, stops cleanly, starts)")),
     (r"^restart ([\w@.-]+)$", lambda m: Route("restart_service", {"unit": m[1]}, f"Restart **{m[1]}**?")),
     (r"^(mc|minecraft)( status)?$", lambda m: Route("mc_status")),
     (r"^(who'?s on|players|who is on|online)\??$", lambda m: Route("mc_players")),

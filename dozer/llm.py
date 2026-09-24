@@ -65,6 +65,7 @@ TOOL_SCHEMAS = [
         {"unit": {"type": "string"}}, ["unit"]),
     _fn("mc_command", "Send a command to the Minecraft console (asks Isaac first).",
         {"command": {"type": "string"}}, ["command"]),
+    _fn("mc_restart", "Gracefully restart the Minecraft server: warn players, save, stop cleanly, start (asks first)."),
     _fn("mc_backup_now", "Make a Minecraft world backup now (save-off, archive, save-on). Asks first; DMs when done."),
     _fn("mc_start", "Start the Minecraft server (asks first)."),
     _fn("mc_stop", "Stop the Minecraft server (asks first)."),

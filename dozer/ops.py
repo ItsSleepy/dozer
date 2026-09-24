@@ -34,7 +34,8 @@ def set_notifier(fn):
 
 
 async def _mc(cmd: str):
-    await _run("screen", "-p", "0", "-S", "eugh", "-X", "stuff", f"{cmd}\r")
+    from .tools import mc_console
+    return await mc_console(cmd)
 
 
 # ── Minecraft ───────────────────────────────────────────────────────────────
@@ -87,6 +88,9 @@ async def mc_start() -> str:
 
 
 async def mc_stop() -> str:
+    from . import rcon
+    if await rcon.available():
+        await rcon.command("save-all flush", timeout=60)
     code, out = await _run("sudo", "-n", "systemctl", "stop", "eugh", timeout=180)
     return "Minecraft server stopped." if code == 0 else f"Stop failed: {out[-300:]}"
 

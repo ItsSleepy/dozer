@@ -126,6 +126,7 @@ async def briefing_text() -> str:
         f"**Services:** {'all up' if not down else 'down: ' + ', '.join(down)}",
         f"**Minecraft:** {await tools.mc_status()}",
         f"**Last world backup:** {backup_age_line()}",
+        *(["⚠️ **Minecraft is running an outdated Java** — `restart mc` when nobody's on."] if tools.java_stale() else []),
         f"**Gaming PC:** {(await tools.pc_status()).replace(chr(10), ' · ')}",
         f"**Alerts since last briefing:** {len(alerts_since_briefing)}"
         + ("".join(f"\n• {a}" for a in alerts_since_briefing[-10:]) if alerts_since_briefing else ""),
@@ -160,6 +161,7 @@ async def alert(text: str):
 async def watchdog_loop():
     prev = await tools.service_states()
     disk_alerted = False
+    java_alerted = False
     audit("watchdog_start", states=prev)
     while True:
         await asyncio.sleep(60)
@@ -172,6 +174,14 @@ async def watchdog_loop():
                 elif p is not None and p != "active" and s == "active":
                     await alert(f"**{u}** is back up.")
             prev = cur
+            stale = tools.java_stale()
+            if stale and not java_alerted:
+                java_alerted = True
+                await alert("Java was updated on disk but Minecraft is still running the old version. "
+                            "Its next stop may not save cleanly unless it goes through RCON. "
+                            "When nobody's on (`who's on`), run `restart mc`.")
+            elif not stale:
+                java_alerted = False
             pct = psutil.disk_usage("/").percent
             if pct >= C.DISK_ALERT_PCT and not disk_alerted:
                 disk_alerted = True

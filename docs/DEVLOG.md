@@ -215,7 +215,25 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Verified from theminipc: `pc info` -> "Up 3h 25m, idle 0m, games none, GPU 16%, 2.7/16 GB VRAM, 52°C".
 - Security check: request without the secret -> 403.
 
+### ~17:45 UTC — Crash fix, parts 1 + 2 (+ RCON safety net)
+- Deeper finding: every Minecraft command (Dozer's, systemd's ExecStop, backups) went through the screen console, which is
+  exactly what breaks after an in-place Java update. RCON was disabled.
+- server.properties: enable-rcon=true, new random rcon.password (in Dozer .env as MC_RCON_PASSWORD), port 25575,
+  broadcast-rcon-to-ops=false. Backup: server.properties.bak-pre-rcon. Takes effect at the next MC restart.
+  Router must NOT forward 25575 (only 25565).
+- dozer/rcon.py: minimal async RCON client. mc_console(): RCON first (returns output), screen fallback.
+  Used by mc_command, mc_players, backups (save-off/save-all/save-on), whitelist, mc_stop.
+- New mc_restart (graceful): warn players, 10 s, save-all flush, stop via RCON, wait up to 2 min, start. `restart mc`,
+  `restart minecraft`, `restart eugh` and restart_service("eugh") all use it. Before RCON is live it falls back to systemd.
+- Part 2: java_stale() finds JVM files the running server still maps but that were replaced on disk ("(deleted)" in
+  /proc/<pid>/maps). Watchdog DMs once per occurrence; briefing shows a warning line. Currently clean.
+- Part 1 (Isaac, sudo): deploy/needrestart-eugh.conf -> /etc/needrestart/conf.d/50-eugh.conf (perl -c OK).
+- Extra (Isaac, sudo): deploy/eugh-rcon-stop.conf systemd drop-in -> ExecStop = deploy/mc_stop.py (RCON save + stop,
+  screen fallback, waits up to 80 s for the JVM to exit). Covers stops that don't come from Dozer.
+
 ### Open for Isaac
+- [ ] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
+- [ ] Check the router doesn't forward port 25575.
 - [x] Install the Windows agent (install_dozer_agent.ps1) and run `pc info`.
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.

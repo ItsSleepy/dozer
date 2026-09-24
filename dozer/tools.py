@@ -16,7 +16,7 @@ import psutil
 from . import config as C
 from .audit import audit
 
-CONFIRM_TOOLS = {"restart_service", "mc_command"}
+CONFIRM_TOOLS = {"restart_service", "mc_command", "mc_restart"}
 UNIT_RE = re.compile(r"^[A-Za-z0-9@._-]{1,64}$")
 
 
@@ -86,7 +86,64 @@ async def mc_status() -> str:
     return f"Minecraft (eugh): {active}, {'listening on 25565' if listening else 'NOT listening on 25565'}"
 
 
+async def mc_console(cmd: str) -> str:
+    """Send a console command: RCON first (returns output), screen as fallback (no output)."""
+    from . import rcon
+    try:
+        out = await rcon.command(cmd)
+        return out or "(done)"
+    except rcon.RconError:
+        await _run("screen", "-p", "0", "-S", C.MC_SCREEN, "-X", "stuff", f"{cmd}\r")
+        return "(sent via screen console — RCON not available yet)"
+
+
+def java_stale() -> list:
+    """JVM files the running Minecraft server still uses but that were replaced on disk (in-place Java update)."""
+    stale = set()
+    for p in psutil.process_iter(["name", "cwd"]):
+        try:
+            if p.info["name"] == "java" and p.info["cwd"] == str(C.MC_LOG.parent.parent):
+                with open(f"/proc/{p.pid}/maps") as f:
+                    stale |= {l.split()[-2] for l in f if "(deleted)" in l and "/jvm/" in l}
+        except (psutil.Error, OSError):
+            pass
+    return sorted(stale)
+
+
+async def mc_restart() -> str:
+    """Graceful restart: save via RCON, stop via RCON, wait for exit, start. Works even after a Java update."""
+    from . import rcon
+    if not await rcon.available():
+        code, out = await _run("sudo", "-n", "systemctl", "restart", "eugh", timeout=180)
+        return ("Restarted via systemd (RCON not available yet — this restart turns it on)."
+                if code == 0 else f"Restart failed: {out[-300:]}")
+    await rcon.command("say Server restarting in 10 seconds")
+    await asyncio.sleep(10)
+    await rcon.command("save-all flush", timeout=60)
+    await rcon.command("stop")
+    for _ in range(60):                                   # up to 2 min for a clean exit
+        await asyncio.sleep(2)
+        _, st = await _run("systemctl", "is-active", "eugh")
+        if st.strip() in ("inactive", "failed", "activating"):
+            break
+    _, st = await _run("systemctl", "is-active", "eugh")
+    if st.strip() != "active":
+        code, out = await _run("sudo", "-n", "systemctl", "start", "eugh", timeout=60)
+        if code != 0:
+            return f"Saved and stopped cleanly, but start failed: {out[-300:]}"
+    return "Minecraft saved, stopped cleanly and started again (takes ~1–2 min to be joinable)."
+
+
 async def mc_players() -> str:
+    from . import rcon
+    try:
+        out = await rcon.command("list")
+        m = re.search(r"There are (\d+) of a max of (\d+) players online:?\s*(.*)", out)
+        if m:
+            n, mx, names = m.groups()
+            return f"{n}/{mx} online" + (f": {names}" if names.strip() else "")
+    except rcon.RconError:
+        pass
     if not shutil.which("screen"):
         return "screen not available."
     size_before = C.MC_LOG.stat().st_size if C.MC_LOG.exists() else 0
@@ -166,6 +223,8 @@ async def weather() -> str:
 async def restart_service(unit: str) -> str:
     if not UNIT_RE.match(unit):
         return "Invalid unit name."
+    if unit == "eugh":
+        return await mc_restart()           # always the graceful path for Minecraft
     if unit in C.SUDO_RESTART_OK:
         code, out = await _run("sudo", "-n", "systemctl", "restart", unit, timeout=120)
     elif shutil.which(C.RESTART_WRAPPER):
@@ -185,8 +244,8 @@ async def mc_command(command: str) -> str:
         return "Empty command."
     if c.split()[0].lower() in ("stop", "op", "deop", "ban-ip"):
         return f"Refused: '{c.split()[0]}' is blocked for Dozer."
-    await _run("screen", "-p", "0", "-S", C.MC_SCREEN, "-X", "stuff", f"{c}\r")
-    return f"Sent to console: {c}"
+    out = await mc_console(c)
+    return f"`{c}` → {out}"
 
 
 async def wake_pc() -> str:
@@ -227,6 +286,7 @@ REGISTRY = {
     "add_idea": add_idea,
     "restart_service": restart_service,
     "mc_command": mc_command,
+    "mc_restart": mc_restart,
 }
 
 
