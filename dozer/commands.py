@@ -16,7 +16,7 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `mc` — Minecraft status · `who's on` — players online
 `mc <command>` — console command, asks first
 `pc` — gaming PC + brain status · `wake pc` — Wake-on-LAN
-`weather` · `briefing` — morning briefing now
+`backups` — Minecraft backups · `weather` · `briefing` — morning briefing now
 `idea <text>` — add to the ideas tracker
 `help` — this list"""
 
@@ -32,6 +32,7 @@ _P = [
     (r"^(pc|is (my )?pc on|pc status|brain)\??$", lambda m: Route("pc_status")),
     (r"^wake( up)?( my)?( the)? pc$", lambda m: Route("wake_pc")),
     (r"^weather$", lambda m: Route("weather")),
+    (r"^(mc )?backups?$", lambda m: Route("mc_backups")),
     (r"^briefing$", lambda m: Route("briefing")),
     (r"^idea (.+)$", lambda m: Route("add_idea", {"text": m[1]})),
 ]

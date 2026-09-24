@@ -103,6 +103,19 @@ Clip sharing discussion:
 - /usr/local/bin/dozer-restart + /etc/sudoers.d/dozer installed; sudo -n works; wrapper rejects bad unit names (exit 2). Any service can now be restarted (with confirmation).
 - php8.3-fpm sudoers rule still stale — harmless now, since php8.5-fpm goes through the wrapper.
 
+### 14:42 UTC — First real brain conversations (Isaac)
+- Normal questions answered via qwen2.5:14b with tool calls, 1–3 s per turn warm.
+- Problem found in the audit log: asked about Minecraft backups, the model guessed — called eugh-mcp "the backup service",
+  passed unsupported args to get_services, and looked up non-existent units "backup"/"mc-backup". Root cause: no file/backup tool + no knowledge of the setup.
+
+### ~14:50 UTC — Fix: no more guessing
+- New tool mc_backups (+ fixed command `backups`): lists /home/sleepy/eugh/backups (4 world backups, 36.7 GB, latest 22 Sep 06:36)
+  and /home/sleepy/backups (1 full backup, 17 Aug). Backups are manual — no scheduled backup service exists.
+- get_services now accepts an optional unit.
+- System prompt: "facts about Isaac's setup" (what each service really is) + rule to say "I don't have a tool for that yet" instead of guessing.
+- Retest: backups question -> correct list in 4.8 s; "What's in my Downloads on the gaming PC?" -> "I don't have a tool for that yet." (0.4 s).
+- Dozer restarted via its own restart wrapper.
+
 ### Open for Isaac
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.

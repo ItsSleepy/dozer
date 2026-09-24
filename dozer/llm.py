@@ -11,7 +11,21 @@ SYSTEM_PROMPT = """You are Dozer, Isaac's self-hosted personal assistant.
 You run on his home server (theminipc) and talk to him over Discord DMs.
 Be concise and direct. Use tools to check real state instead of guessing.
 Temperatures in Celsius. If a tool needs confirmation, the system will ask Isaac;
-just call it. Never invent tool results."""
+just call it. Never invent tool results.
+
+Rules:
+- Only use the tools you have. If none of them can answer, say plainly
+  "I don't have a tool for that yet" and suggest what tool would help. Do NOT guess.
+- Never guess what a service does; use the facts below.
+
+Facts about Isaac's setup:
+- eugh = the Minecraft server (NeoForge 1.21.1 modpack), console in screen session "eugh".
+- nginx = reverse proxy for all sites; php8.5-fpm = PHP for isaac-dev.eu and client sites.
+- netdata = monitoring dashboard; docker = containers.
+- discord-bot = the "Us" bot (couple server); fun-bot = economy/fun bot; cs2bot, leetifybot = CS2 stat bots;
+  mc-status-bot = Minecraft status bot; eugh-mcp = the connector Claude uses to manage this server (NOT backups).
+- Minecraft backups are made manually as .tar.gz files; use mc_backups to list them. There is no backup service.
+- Gaming PC = RTX 4080 Super, woken by Wake-on-LAN; you (the LLM) run on it."""
 
 
 def _fn(name, desc, props=None, required=None):
@@ -22,12 +36,14 @@ def _fn(name, desc, props=None, required=None):
 
 TOOL_SCHEMAS = [
     _fn("get_health", "CPU, RAM, disk, temperature and uptime of the home server."),
-    _fn("get_services", "Status of all watched services on the home server."),
+    _fn("get_services", "Status of watched services, or one service if unit is given.",
+        {"unit": {"type": "string"}}),
     _fn("get_logs", "Recent journal log lines for a systemd unit.",
         {"unit": {"type": "string"}, "lines": {"type": "integer"}}, ["unit"]),
     _fn("mc_status", "Whether the Minecraft server (eugh) is running."),
     _fn("mc_players", "Who is online on the Minecraft server."),
     _fn("pc_status", "Whether the gaming PC and the Ollama brain are online."),
+    _fn("mc_backups", "List Minecraft world backups and full server backups with sizes and dates."),
     _fn("weather", "Current weather and today's forecast for Isaac's area."),
     _fn("wake_pc", "Send Wake-on-LAN to the gaming PC."),
     _fn("add_idea", "Add an idea to Isaac's Discord ideas tracker.",

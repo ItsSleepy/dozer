@@ -66,8 +66,8 @@ async def service_states(units=None) -> dict:
     return out
 
 
-async def get_services() -> str:
-    states = await service_states()
+async def get_services(unit: str = "") -> str:
+    states = await service_states([unit] if unit and UNIT_RE.match(unit) else None)
     return "\n".join(f"{'🟢' if s == 'active' else '🔴'} {u} — {s}" for u, s in states.items())
 
 
@@ -103,6 +103,26 @@ async def mc_players() -> str:
             n, mx, names = m.groups()
             return f"{n}/{mx} online" + (f": {names}" if names.strip() else "")
     return "No reply from the server console (is it running?)."
+
+
+BACKUP_DIRS = {
+    "Minecraft world backups": C.MC_LOG.parent.parent / "backups",
+    "Full server backups": C.MC_LOG.parent.parent.parent / "backups",
+}
+
+
+async def mc_backups() -> str:
+    from datetime import datetime
+    out = []
+    for label, d in BACKUP_DIRS.items():
+        files = sorted((f for f in d.glob("*.tar.gz") if f.is_file()), key=lambda f: f.stat().st_mtime, reverse=True) if d.exists() else []
+        total = sum(f.stat().st_size for f in files)
+        out.append(f"**{label}** ({d}) — {len(files)} file(s), {total / 2**30:.1f} GB")
+        for f in files[:8]:
+            st = f.stat()
+            out.append(f"• {f.name} — {st.st_size / 2**30:.1f} GB — {datetime.fromtimestamp(st.st_mtime):%d %b %Y %H:%M}")
+    out.append("Backups are made manually (no scheduled backup service).")
+    return "\n".join(out)
 
 
 async def pc_status() -> str:
@@ -195,6 +215,7 @@ REGISTRY = {
     "mc_status": mc_status,
     "mc_players": mc_players,
     "pc_status": pc_status,
+    "mc_backups": mc_backups,
     "weather": weather,
     "wake_pc": wake_pc,
     "add_idea": add_idea,
