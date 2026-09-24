@@ -98,10 +98,15 @@ Clip sharing discussion:
 - Test 2 (warm): "How is the server doing and is anyone on Minecraft?" -> get_health + mc_status + mc_players -> correct summary in 4.5 s.
 - Next: pull qwen3:14b and compare tool-calling reliability.
 
+### 14:41 UTC — Permanent service
+- Isaac installed dozer.service (enabled, active, PID 3930704) and stopped the interim run-loop. Dozer now survives power cycles and eugh-mcp restarts.
+- /usr/local/bin/dozer-restart + /etc/sudoers.d/dozer installed; sudo -n works; wrapper rejects bad unit names (exit 2). Any service can now be restarted (with confirmation).
+- php8.3-fpm sudoers rule still stale — harmless now, since php8.5-fpm goes through the wrapper.
+
 ### Open for Isaac
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
-- [ ] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
-- [ ] Install deploy/dozer-restart + deploy/dozer-sudoers (restart any service). Also fix the stale php8.3-fpm sudoers rule -> php8.5-fpm.
+- [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
+- [x] Install deploy/dozer-restart + deploy/dozer-sudoers (restart any service). Also fix the stale php8.3-fpm sudoers rule -> php8.5-fpm.
 - [ ] Review + apply deploy/send-quote-webhook.md to api/send-quote.php.
 - [ ] Medal session -> .env (MEDAL_SESSION) for the clip feature (v1.1).
 - [ ] Reset the Dozer token (was pasted in chat) and update .env.
