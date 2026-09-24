@@ -9,7 +9,7 @@ import psutil
 from aiohttp import web
 
 from . import config as C
-from . import llm, tools
+from . import llm, scheduler, tools
 from .audit import audit, log
 from .commands import HELP, route
 
@@ -80,6 +80,39 @@ async def execute_tool(dest, name: str, args: dict) -> str:
     return await tools.call(name, **args)
 
 
+# ── scheduled jobs ──────────────────────────────────────────────────────────
+
+async def run_job(job: dict):
+    cmd = job["command"]
+    r = route(cmd)
+    try:
+        if r and r.tool == "briefing":
+            text = await briefing_text()
+        elif r and r.tool in tools.REGISTRY:
+            text = await tools.call(r.tool, **r.args)          # confirmed once, at creation
+        else:
+            async def read_only(name, args):
+                if name in tools.CONFIRM_TOOLS:
+                    return "Not allowed in a scheduled task (needs confirmation)."
+                return await tools.call(name, **args)
+            text = await llm.run([], cmd, read_only) if await tools.brain_online() else "Brain offline — skipped."
+    except Exception as e:
+        text = f"Failed: {e.__class__.__name__}: {e}"
+        audit("error", where="run_job", id=job["id"], error=repr(e))
+    audit("schedule_result", id=job["id"], result=text)
+    await dm(f"⏰ `#{job['id']}` {cmd}\n{text}")
+
+
+def backup_age_line() -> str:
+    files = sorted(tools.ops.BACKUP_DIR.glob("world-*.tar.gz"), key=lambda f: f.stat().st_mtime)
+    if not files:
+        return "⚠️ no world backups found"
+    age = datetime.now().timestamp() - files[-1].stat().st_mtime
+    days = age / 86400
+    txt = f"{files[-1].name} ({days * 24:.0f} h ago)" if days < 2 else f"⚠️ {files[-1].name} ({days:.0f} days ago)"
+    return txt
+
+
 # ── briefing ────────────────────────────────────────────────────────────────
 
 async def briefing_text() -> str:
@@ -92,6 +125,7 @@ async def briefing_text() -> str:
         f"**Box:**\n{await tools.get_health()}",
         f"**Services:** {'all up' if not down else 'down: ' + ', '.join(down)}",
         f"**Minecraft:** {await tools.mc_status()}",
+        f"**Last world backup:** {backup_age_line()}",
         f"**Gaming PC:** {(await tools.pc_status()).replace(chr(10), ' · ')}",
         f"**Alerts since last briefing:** {len(alerts_since_briefing)}"
         + ("".join(f"\n• {a}" for a in alerts_since_briefing[-10:]) if alerts_since_briefing else ""),
@@ -184,6 +218,22 @@ async def handle(message: discord.Message):
         return await send(dest, HELP)
     if r and r.tool == "briefing":
         return await send(dest, await briefing_text())
+    if r and r.tool == "schedules":
+        return await send(dest, scheduler.describe())
+    if r and r.tool == "schedule_add":
+        spec, cmd = r.args["spec"], r.args["command"]
+        if not scheduler.valid_spec(spec):
+            return await send(dest, "Invalid schedule. Use `daily HH:MM`, `weekly sun HH:MM` or `every 6h` / `every 30m` (min 15m).")
+        if not await confirm(dest, f"Schedule **{spec}** → `{cmd}`?\nIt will run on its own without asking each time."):
+            return await send(dest, "Cancelled.")
+        job = scheduler.add(spec, cmd)
+        nxt = datetime.fromisoformat(job["next"]).strftime("%a %d %b %H:%M")
+        return await send(dest, f"Scheduled `#{job['id']}` — first run {nxt}.")
+    if r and r.tool == "schedule_remove":
+        return await send(dest, "Removed." if scheduler.remove(r.args["jid"]) else "No such task.")
+    if r and r.tool == "schedule_toggle":
+        ok = scheduler.set_enabled(r.args["jid"], r.args["on"])
+        return await send(dest, ("Resumed." if r.args["on"] else "Paused.") if ok else "No such task.")
     if r:
         if r.tool in tools.CONFIRM_TOOLS and not await confirm(dest, r.label or f"Run {r.tool}?"):
             return await send(dest, "Cancelled.")
@@ -219,6 +269,8 @@ async def on_ready():
     if not getattr(client, "_bg", False):
         client._bg = True
         tools.ops.set_notifier(dm)
+        scheduler.set_runner(run_job)
+        asyncio.create_task(scheduler.loop())
         asyncio.create_task(watchdog_loop())
         asyncio.create_task(briefing_loop())
         await start_webhook()

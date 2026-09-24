@@ -24,10 +24,19 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `start mc` / `stop mc` (asks) · `whitelist` · `whitelist add|remove <name>` (asks)
 `disk [path]` · `top` / `top ram` · `sites` · `updates` · `ip`
 `docker` · `docker restart <name>` (asks) · `ls <path>` · `read <file> [lines]`
-`help` — this list"""
+`help` — this list
+
+**Scheduled tasks**
+`schedules` — list · `schedule daily 04:00 <command>` · `schedule weekly sun 04:00 <command>`
+`schedule every 6h <command>` (min 15m) · `unschedule <id>` · `pause <id>` · `resume <id>`"""
 
 _P = [
     (r"^(help|commands|\?)$", lambda m: Route("help")),
+    (r"^(schedules?|scheduled|jobs)$", lambda m: Route("schedules")),
+    (r"^schedule (daily \d{1,2}:\d{2}|weekly (?:mon|tue|wed|thu|fri|sat|sun) \d{1,2}:\d{2}|every \d+[hm]) (.+)$",
+     lambda m: Route("schedule_add", {"spec": m[1], "command": m[2]})),
+    (r"^unschedule #?(\d+)$", lambda m: Route("schedule_remove", {"jid": int(m[1])})),
+    (r"^(pause|resume) #?(\d+)$", lambda m: Route("schedule_toggle", {"jid": int(m[2]), "on": m[1].lower() == "resume"})),
     (r"^(status|health|box|how'?s the (box|server))\??$", lambda m: Route("get_health")),
     (r"^services?$", lambda m: Route("get_services")),
     (r"^logs? ([\w@.-]+)(?: (\d+))?$", lambda m: Route("get_logs", {"unit": m[1], "lines": int(m[2] or 20)})),

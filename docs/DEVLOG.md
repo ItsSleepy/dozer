@@ -160,6 +160,28 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
   Fix: PC counts as on if ping OR Ollama responds.
 - Bug: disk_usage("/") returned "Path not allowed." Fix: always returns free space; folder breakdown only for allowed folders.
 
+### ~16:00 UTC — Investigation: "Minecraft crash" on 23 Sep (Claude)
+- Not a crash. 06:15:56 UTC unattended-upgrades ran; 06:17:02 OpenJDK 21 updated in place; 06:17:04 needrestart auto-restarted
+  eugh, cs2bot, leetifybot, mc-status-bot, eugh-mcp. eugh's ExecStop (screen "stop") never ran cleanly: the console handler
+  died with "Failed to exec spawn helper … after in-place JDK updates", the JVM exited 1 with no "Saving worlds" — unclean stop,
+  up to ~5 min of progress lost. Restarted immediately; fine since.
+- Will recur on every Java update. Proposed fix: needrestart override for eugh (Isaac, sudo) + Dozer alert when the running
+  server uses a replaced Java (not built yet — awaiting go-ahead).
+- Noise: "invalid packet ID: 254" on the Sable UDP channel = internet scanners, harmless.
+
+### 16:15 UTC — Quote webhook applied (Isaac approved)
+- Appended to /var/www/isaac-dev.eu/api/send-quote.php after the final JSON response, using fastcgi_finish_request()
+  so the client never waits on Dozer; 2 s curl timeout; try/catch. Backup: send-quote.php.bak-pre-dozer. php -l clean.
+- Test via PHP curl -> {"ok": true} HTTP 200, DM "TEST-PHP" delivered. Site is not a git repo (secret not in version control).
+
+### 16:16 UTC — Scheduled tasks (Dozer's version of Claude's scheduled tasks)
+- dozer/scheduler.py: jobs in data/schedules.json; specs `daily HH:MM`, `weekly <day> HH:MM`, `every Nh|Nm` (min 15 m), Europe/Malta.
+  Confirm once at creation; runs execute without asking. Fixed commands run directly; free-text jobs go to the brain read-only
+  (confirm tools refused). Results DM'd as "⏰ #id command".
+- Commands: schedules, schedule …, unschedule <id>, pause <id>, resume <id>.
+- Briefing now shows last world backup age (⚠️ if 2+ days).
+- Jobs created per Isaac's request: #1 daily 04:00 `backup`, #2 daily 05:00 `prune backups keep 5`. First run 25 Sep 04:00.
+
 ### Open for Isaac
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
