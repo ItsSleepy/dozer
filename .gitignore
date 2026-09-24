@@ -4,3 +4,9 @@ logs/
 __pycache__/
 deploy/send-quote-webhook.md
 data/
+models/
+android/.gradle/
+android/app/build/
+android/.tmp/
+*.apk
+*.jks

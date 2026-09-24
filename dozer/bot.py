@@ -242,9 +242,59 @@ async def quote_hook(request: web.Request):
     return web.json_response({"ok": True})
 
 
+def _voice_auth(request: web.Request) -> bool:
+    ok = request.headers.get("Authorization", "") == f"Bearer {C.get('VOICE_TOKEN')}" and bool(C.get("VOICE_TOKEN"))
+    if not ok:
+        audit("voice_rejected", path=request.path, remote=request.headers.get("X-Real-IP", request.remote))
+    return ok
+
+
+async def _voice_reply(transcript: str, reply: str, speak: bool = True) -> web.Response:
+    import base64
+    from . import voice
+    audio = base64.b64encode(await voice.synthesize(reply)).decode() if speak else None
+    audit("voice_reply", transcript=transcript, reply=reply)
+    return web.json_response({"ok": True, "transcript": transcript, "reply": reply,
+                              "speech": voice.speakable(reply), "audio_wav_b64": audio})
+
+
+async def api_voice(request: web.Request):
+    """Phone app: raw audio in (wav/ogg/m4a/webm), transcript + reply text + spoken reply out."""
+    if not _voice_auth(request):
+        return web.json_response({"ok": False}, status=401)
+    from . import voice
+    audio = await request.read()
+    if not audio or len(audio) > 8_000_000:
+        return web.json_response({"ok": False, "error": "no audio or too large"}, status=400)
+    t0 = datetime.now()
+    text = await voice.transcribe(audio)
+    reply = await voice.respond(text) if text else "Sorry, I didn't catch that."
+    audit("voice_timing", stt_and_reply_s=round((datetime.now() - t0).total_seconds(), 1), bytes=len(audio))
+    return await _voice_reply(text, reply)
+
+
+async def api_text(request: web.Request):
+    if not _voice_auth(request):
+        return web.json_response({"ok": False}, status=401)
+    from . import voice
+    body = await request.json()
+    text = (body.get("text") or "").strip()
+    reply = await voice.respond(text)
+    return await _voice_reply(text, reply, speak=bool(body.get("speak", True)))
+
+
+async def api_ping(request: web.Request):
+    if not _voice_auth(request):
+        return web.json_response({"ok": False}, status=401)
+    return web.json_response({"ok": True, "brain": await tools.brain_online()})
+
+
 async def start_webhook():
-    app = web.Application()
+    app = web.Application(client_max_size=8_500_000)
     app.router.add_post("/hooks/quote", quote_hook)
+    app.router.add_post("/api/voice", api_voice)
+    app.router.add_post("/api/text", api_text)
+    app.router.add_get("/api/ping", api_ping)
     runner = web.AppRunner(app)
     await runner.setup()
     await web.TCPSite(runner, "127.0.0.1", C.HOOK_PORT).start()
@@ -336,6 +386,8 @@ async def on_ready():
         reminders.set_deliver(deliver_reminder)
         asyncio.create_task(reminders.loop())
         tools.pcagent.set_notifier(dm)
+        from . import voice
+        asyncio.create_task(voice.warm_up())
         asyncio.create_task(tools.pcagent.loop())
         asyncio.create_task(scheduler.loop())
         asyncio.create_task(watchdog_loop())

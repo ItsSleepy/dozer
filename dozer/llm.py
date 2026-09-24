@@ -160,7 +160,7 @@ def _looks_garbled(text: str) -> bool:
     return bool(text) and bool(_GARBLED.search(text))
 
 
-async def run(history: list, user_text: str, execute_tool) -> str:
+async def run(history: list, user_text: str, execute_tool, extra_system: str = "") -> str:
     """Agent loop: model -> tools -> model, max 5 rounds.
     execute_tool(name, args) handles confirmation and returns a result string."""
     from datetime import datetime
@@ -168,7 +168,8 @@ async def run(history: list, user_text: str, execute_tool) -> str:
     now = datetime.now(ZoneInfo(C.TZ_NAME)).strftime("%A %d %B %Y, %H:%M")
     from . import memory
     mem = memory.context_for(user_text)
-    system = SYSTEM_PROMPT + f"\n\nCurrent date/time (Malta): {now}" + (f"\n\n{mem}" if mem else "")
+    system = SYSTEM_PROMPT + f"\n\nCurrent date/time (Malta): {now}" + (f"\n\n{mem}" if mem else "") \
+        + (f"\n\n{extra_system}" if extra_system else "")
     messages = [{"role": "system", "content": system}, *history,
                 {"role": "user", "content": user_text}]
     retried = False

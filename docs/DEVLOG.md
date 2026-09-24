@@ -280,7 +280,34 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Tests: Wikipedia Wake-on-LAN summary 8.9 s; "what changed in the latest CS2 update?" -> brain searched and answered
   with the source link (9.6 s).
 
+### ~21:50–22:10 UTC — Hands-free voice (phase: voice)
+Decision (Isaac): not Discord voice notes — a real "Hey Dozer" wake word on the phone, usable while driving.
+- Server: faster-whisper 1.2.1 (base.en, int8, CPU, 8 threads) + piper-tts (en_GB-alan-medium). Benchmarks on the mini PC:
+  base.en 1.8 s for 5.3 s of speech (misheard "server" as "servo" until given a vocabulary hint), small.en 5.0–5.8 s.
+  Chosen: base.en + hint. Piper 0.66 s per reply once loaded. Models load at Dozer start (2.8 s).
+- dozer/voice.py: transcribe, jargon fixes ("engine x" -> nginx, "metal clip" -> medal clip, "dosa" -> Dozer, …),
+  speakable() (strips markdown/links/emojis, max ~600 chars), respond() = hands-free turn: fixed commands, reminders,
+  brain with voice rules (1–3 spoken sentences), spoken yes/no confirmations (90 s window), brain offline -> "wake it? yes or no".
+- API on 127.0.0.1:8095: POST /api/voice (audio in -> transcript, reply, WAV), POST /api/text, GET /api/ping.
+  Bearer VOICE_TOKEN (in .env). Wrong token -> 401 + logged.
+- End-to-end test with Piper-generated questions: "Is anyone on Minecraft?" (67 s — brain cold start), "Restart nginx" ->
+  "Restart nginx? Yes or no?" -> "Yes" -> "Restarted nginx → active", weather 6.8 s. (Restarting nginx briefly dropped
+  Claude's own connection — don't restart nginx during tests.)
+- deploy/nginx-dozer.conf: dozer.isaac-dev.eu, only /api/ proxied, 30 req/min rate limit, 9 MB body, 240 s read timeout.
+- Android app (android/, Kotlin, no UI framework): foreground service (microphone type) + Picovoice Porcupine 3.0.3
+  wake word (built-in "Jarvis" until the custom "Hey Dozer" .ppn is imported), beep -> record 16 kHz until 1.2 s of silence
+  (energy VAD, max 15 s) -> /api/voice -> play reply with audio focus (ducks music, goes to car Bluetooth) -> if the reply
+  ends with "?" listen again without the wake word (max 4 turns). Android TTS speaks errors ("I can't reach Dozer").
+  Notification actions Talk / Stop; settings: server, token, Picovoice AccessKey; wake-word import; battery-optimisation button.
+- Build on the mini PC: Android SDK cmdline-tools 14742923 (platform 35, build-tools 35.0.0), Gradle 8.10.2, AGP 8.7.3,
+  Kotlin 2.0.21, Temurin JDK 17 in ~/jdk-17 (system only had the Java 21 runtime). Sandbox /tmp is read-only ->
+  tmpdir inside the project + in-process Kotlin compiler. Release keystore android/dozer-release.jks (password in .env).
+- Dozer-1.0.apk (6.4 MB, signed CN=Dozer, O=IV Studio, C=MT) sent to Isaac by Dozer DM with the token (spoiler).
+
 ### Open for Isaac
+- [ ] Cloudflare DNS: A record dozer -> 69.6.57.87; install deploy/nginx-dozer.conf; certbot for dozer.isaac-dev.eu.
+- [ ] Picovoice: AccessKey + train "Hey Dozer" (Android) -> import .ppn in the app.
+- [ ] Install Dozer-1.0.apk, paste token + AccessKey, Test connection, Start listening, battery -> unrestricted.
 - [x] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
 - [ ] Check the router doesn't forward port 25575.
 - [x] Install the Windows agent (install_dozer_agent.ps1) and run `pc info`.
