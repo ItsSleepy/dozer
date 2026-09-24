@@ -182,10 +182,24 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Briefing now shows last world backup age (⚠️ if 2+ days).
 - Jobs created per Isaac's request: #1 daily 04:00 `backup`, #2 daily 05:00 `prune backups keep 5`. First run 25 Sep 04:00.
 
+### ~16:45 UTC — Medal clips
+- Isaac captured the clip-list request in DevTools: GET https://medal.tv/api/content?userId=42525252&... with header
+  X-Authentication (user id + mdl_ token). Stored as MEDAL_SESSION / MEDAL_USER_ID in .env (token was visible in a chat
+  screenshot — logging out of that Medal browser session will invalidate it; then capture a fresh one).
+- Findings: without the privacy param the API returns everything (1,100+ clips, newest 22 Sep 2026). Privacy values:
+  0/1 = old public/unlisted, 4 = anyone with the link (1,075 clips, anonymous API GET = 200), 5 = private (anonymous = 403, 25 clips).
+  -> No privacy changes needed; Dozer refuses privacy-5 clips. Almost all clips are "Untitled" -> select by game + recency.
+  Games: CS2 878, Roblox 67, Minecraft 49, Screen Recording 42, MECCHA CHAMELEON 30, …
+- dozer/medal.py: medal_clips(game, n) and post_clip(which, game, channel, note) — posts the Medal share link to a BMW
+  channel via the Dozer bot (Discord embeds it; no upload size limits). Default channel #faze_clipz. 2-minute cache,
+  newest 300 clips. Expired session -> clear message to refresh MEDAL_SESSION.
+- Commands: `clips [game] [n]`, `post clip [n] [game] [to <channel>]` (confirm shows the exact clip + link). Brain tools too.
+- Fix: dates now include the year when not this year (13 Mar 2026 vs 09 Apr 2025 looked out of order).
+
 ### Open for Isaac
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
 - [x] Install deploy/dozer-restart + deploy/dozer-sudoers (restart any service). Also fix the stale php8.3-fpm sudoers rule -> php8.5-fpm.
 - [ ] Review + apply deploy/send-quote-webhook.md to api/send-quote.php.
-- [ ] Medal session -> .env (MEDAL_SESSION) for the clip feature (v1.1).
+- [x] Medal session -> .env (MEDAL_SESSION) for the clip feature.
 - [ ] Reset the Dozer token (was pasted in chat) and update .env.

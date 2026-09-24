@@ -225,9 +225,10 @@ REGISTRY = {
 }
 
 
-from . import ops  # noqa: E402  (after _run/UNIT_RE are defined)
+from . import ops, medal  # noqa: E402  (after _run/UNIT_RE are defined)
 REGISTRY.update(ops.OPS)
-CONFIRM_TOOLS |= ops.CONFIRM_OPS
+REGISTRY.update({"medal_clips": medal.medal_clips, "post_clip": medal.post_clip})
+CONFIRM_TOOLS |= ops.CONFIRM_OPS | {"post_clip"}
 
 
 async def call(name: str, **args) -> str:

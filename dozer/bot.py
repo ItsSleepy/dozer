@@ -234,6 +234,8 @@ async def handle(message: discord.Message):
     if r and r.tool == "schedule_toggle":
         ok = scheduler.set_enabled(r.args["jid"], r.args["on"])
         return await send(dest, ("Resumed." if r.args["on"] else "Paused.") if ok else "No such task.")
+    if r and r.label == "medal":
+        r.label = await tools.medal.describe_pick(**{k: v for k, v in r.args.items() if k in ("which", "game", "channel")})
     if r:
         if r.tool in tools.CONFIRM_TOOLS and not await confirm(dest, r.label or f"Run {r.tool}?"):
             return await send(dest, "Cancelled.")

@@ -18,6 +18,7 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `pc` — gaming PC + brain status · `wake pc` — Wake-on-LAN
 `backups` — Minecraft backups · `weather` · `briefing` — morning briefing now
 `idea <text>` — add to the ideas tracker
+`clips [game] [n]` — recent Medal clips · `post clip [n] [game] [to <channel>]` — posts to BMW (asks)
 
 **Small ops**
 `backup` — world backup now (asks) · `prune backups [keep N]` (asks)
@@ -47,6 +48,9 @@ _P = [
     (r"^(pc|is (my )?pc on|pc status|brain)\??$", lambda m: Route("pc_status")),
     (r"^wake( up)?( my)?( the)? pc$", lambda m: Route("wake_pc")),
     (r"^weather$", lambda m: Route("weather")),
+    (r"^clips?(?: (.+?))?(?: (\d+))?$", lambda m: Route("medal_clips", {"game": m[1] or "", "n": int(m[2] or 5)})),
+    (r"^post (?:my )?clip(?: (\d+))?(?: (?!to )(.+?))?(?: to #?(\S+))?$",
+     lambda m: Route("post_clip", {"which": int(m[1] or 1), "game": m[2] or "", "channel": m[3] or ""}, "medal")),
     (r"^(mc )?backups$|^list backups$", lambda m: Route("mc_backups")),
     (r"^(make a |do a )?backup( now)?$|^backup (the )?(mc|world|minecraft)$", lambda m: Route("mc_backup_now", {}, "Back up the Minecraft world now? (saving pauses during the archive)")),
     (r"^prune backups?(?: keep (\d+))?$", lambda m: Route("prune_backups", {"keep": int(m[1] or 3)}, f"Delete old world backups, keeping the newest {int(m[1] or 3)}?")),
