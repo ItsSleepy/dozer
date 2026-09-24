@@ -210,8 +210,13 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Gaming detection: agent polled every 60 s; while a game runs, Ollama keep_alive = 0 (model unloads right after each answer,
   VRAM goes back to the game); otherwise 5 min.
 
+### ~17:25 UTC — Agent installed (Isaac)
+- First run from system32 failed (wrong folder); files had downloaded as a zip -> extracted to Downloads\dozer-agent, installer ran.
+- Verified from theminipc: `pc info` -> "Up 3h 25m, idle 0m, games none, GPU 16%, 2.7/16 GB VRAM, 52°C".
+- Security check: request without the secret -> 403.
+
 ### Open for Isaac
-- [ ] Install the Windows agent (install_dozer_agent.ps1) and run `pc info`.
+- [x] Install the Windows agent (install_dozer_agent.ps1) and run `pc info`.
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
 - [x] Install deploy/dozer-restart + deploy/dozer-sudoers (restart any service). Also fix the stale php8.3-fpm sudoers rule -> php8.5-fpm.
