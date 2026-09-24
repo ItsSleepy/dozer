@@ -218,6 +218,7 @@ async def on_ready():
     audit("startup", user=str(client.user), guilds=[g.name for g in client.guilds])
     if not getattr(client, "_bg", False):
         client._bg = True
+        tools.ops.set_notifier(dm)
         asyncio.create_task(watchdog_loop())
         asyncio.create_task(briefing_loop())
         await start_webhook()

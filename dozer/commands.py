@@ -18,6 +18,12 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `pc` — gaming PC + brain status · `wake pc` — Wake-on-LAN
 `backups` — Minecraft backups · `weather` · `briefing` — morning briefing now
 `idea <text>` — add to the ideas tracker
+
+**Small ops**
+`backup` — world backup now (asks) · `prune backups [keep N]` (asks)
+`start mc` / `stop mc` (asks) · `whitelist` · `whitelist add|remove <name>` (asks)
+`disk [path]` · `top` / `top ram` · `sites` · `updates` · `ip`
+`docker` · `docker restart <name>` (asks) · `ls <path>` · `read <file> [lines]`
 `help` — this list"""
 
 _P = [
@@ -32,7 +38,21 @@ _P = [
     (r"^(pc|is (my )?pc on|pc status|brain)\??$", lambda m: Route("pc_status")),
     (r"^wake( up)?( my)?( the)? pc$", lambda m: Route("wake_pc")),
     (r"^weather$", lambda m: Route("weather")),
-    (r"^(mc )?backups?$", lambda m: Route("mc_backups")),
+    (r"^(mc )?backups$|^list backups$", lambda m: Route("mc_backups")),
+    (r"^(make a |do a )?backup( now)?$|^backup (the )?(mc|world|minecraft)$", lambda m: Route("mc_backup_now", {}, "Back up the Minecraft world now? (saving pauses during the archive)")),
+    (r"^prune backups?(?: keep (\d+))?$", lambda m: Route("prune_backups", {"keep": int(m[1] or 3)}, f"Delete old world backups, keeping the newest {int(m[1] or 3)}?")),
+    (r"^(start|stop) (mc|minecraft)$", lambda m: Route(f"mc_{m[1].lower()}", {}, f"{m[1].capitalize()} the Minecraft server?")),
+    (r"^whitelist$", lambda m: Route("mc_whitelist", {"action": "list"})),
+    (r"^whitelist (add|remove) (\w{3,16})$", lambda m: Route("mc_whitelist", {"action": m[1].lower(), "player": m[2]}, f"Whitelist {m[1].lower()} **{m[2]}**?")),
+    (r"^(disk|du)( usage)?(?: (\S+))?$", lambda m: Route("disk_usage", {"path": m[3] or "/home/sleepy"})),
+    (r"^top( ram| cpu)?$", lambda m: Route("top_processes", {"by": (m[1] or " cpu").strip()})),
+    (r"^(sites?|site check|websites?)$", lambda m: Route("site_check")),
+    (r"^updates?$", lambda m: Route("apt_updates")),
+    (r"^(ip|public ip)$", lambda m: Route("public_ip")),
+    (r"^(docker|containers)$", lambda m: Route("docker_ps")),
+    (r"^docker restart ([\w.-]+)$", lambda m: Route("docker_restart", {"name": m[1]}, f"Restart container **{m[1]}**?")),
+    (r"^ls (\S+)$", lambda m: Route("list_dir", {"path": m[1]})),
+    (r"^(cat|read) (\S+)(?: (\d+))?$", lambda m: Route("read_file", {"path": m[2], "lines": int(m[3] or 40)})),
     (r"^briefing$", lambda m: Route("briefing")),
     (r"^idea (.+)$", lambda m: Route("add_idea", {"text": m[1]})),
 ]

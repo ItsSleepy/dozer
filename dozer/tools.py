@@ -224,6 +224,11 @@ REGISTRY = {
 }
 
 
+from . import ops  # noqa: E402  (after _run/UNIT_RE are defined)
+REGISTRY.update(ops.OPS)
+CONFIRM_TOOLS |= ops.CONFIRM_OPS
+
+
 async def call(name: str, **args) -> str:
     fn = REGISTRY.get(name)
     if not fn:
