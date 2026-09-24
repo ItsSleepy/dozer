@@ -231,8 +231,17 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Extra (Isaac, sudo): deploy/eugh-rcon-stop.conf systemd drop-in -> ExecStop = deploy/mc_stop.py (RCON save + stop,
   screen fallback, waits up to 80 s for the JVM to exit). Covers stops that don't come from Dozer.
 
+### 17:31–17:36 UTC — Crash fix verified
+- Isaac installed /etc/needrestart/conf.d/50-eugh.conf and the eugh.service drop-in (ExecStop = mc_stop.py confirmed).
+- "restart the minecraft server please" -> brain -> mc_restart -> confirmed -> systemd path (RCON not yet on).
+  mc_stop.py: RCON refused (expected, not enabled yet) -> screen fallback -> clean stop: "All dimensions are saved".
+- Server "Done (75.5 s)" at 17:35:10, "RCON running on 0.0.0.0:25575".
+- Verified via RCON: list -> "0 of a max of 20", save-all -> "Saved the game", stale Java: none.
+- From now on: Java updates no longer restart MC; Dozer alerts; restarts/stops/backups go through RCON.
+- Note: server logs "Can't keep up! … 217 ticks behind" right after start-up (normal while chunks load; watch if it persists).
+
 ### Open for Isaac
-- [ ] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
+- [x] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
 - [ ] Check the router doesn't forward port 25575.
 - [x] Install the Windows agent (install_dozer_agent.ps1) and run `pc info`.
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
