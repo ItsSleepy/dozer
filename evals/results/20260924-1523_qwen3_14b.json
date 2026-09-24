@@ -1,0 +1,241 @@
+[
+  {
+    "q": "are my websites all up?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "site_check",
+        {}
+      ]
+    ],
+    "secs": 17.1,
+    "reply": "Here's the status of your websites:\n\n🟢 **isaac-dev.eu** — 200 OK (409 ms), SSL cert expires in 77 days  \n🟢 **dub.isaac-dev.eu** — 200 OK (503 ms), SSL cert expires in 77 days  \n🔴 **monitor.isaac-dev.eu** — 401 Unauthorized (628 ms), SSL cert expires in 77 days  \n🟢 **rickmanvault.com** — 200 OK (249 "
+  },
+  {
+    "q": "how's the server doing?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_health",
+        {}
+      ]
+    ],
+    "secs": 4.9,
+    "reply": "(no reply)"
+  },
+  {
+    "q": "is anyone on minecraft?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_players",
+        {}
+      ]
+    ],
+    "secs": 4.4,
+    "reply": "No one is online on the Minecraft server right now."
+  },
+  {
+    "q": "show me the last 10 log lines of the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "lines": 10,
+          "unit": "eugh"
+        }
+      ]
+    ],
+    "secs": 9.7,
+    "reply": "Here are the latest log entries for the Minecraft server:\n\n- The service has been restarting (scheduled restart job, counter at 1)\n- Last start: Sep 19 20:24:34\n- Crash occurred: Sep 23 06:17:04 (status=1/FAILURE)\n- Systemd automatically restarted the service\n- Memory usage peaked at 6GB during the "
+  },
+  {
+    "q": "is nginx running?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_services",
+        {
+          "unit": "nginx"
+        }
+      ]
+    ],
+    "secs": 5.4,
+    "reply": "nginx is running ✅. Let me know if you need more details!"
+  },
+  {
+    "q": "restart the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "restart_service",
+        {
+          "unit": "eugh"
+        }
+      ]
+    ],
+    "secs": 9.7,
+    "reply": "The restart was declined because Isaac is running a benchmark. Would you like to proceed with the restart now, or wait until the benchmark is complete?"
+  },
+  {
+    "q": "back up the minecraft world",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backup_now",
+        {}
+      ]
+    ],
+    "secs": 5.1,
+    "reply": "The backup was declined (benchmark). Would you like me to check the Minecraft server status or try another action?"
+  },
+  {
+    "q": "what backups do I have?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backups",
+        {}
+      ]
+    ],
+    "secs": 11.3,
+    "reply": "You have the following backups:\n\n**Minecraft World Backups** (stored in `/home/sleepy/eugh/backups`):\n- 4 backups totaling 36.7 GB\n- Recent ones: 22 Sep 2026 (9.2 GB), 20 Sep 2026 (9.2 GB), 07 Sep 2026 (9.2 GB), 31 Aug 2026 (9.2 GB)\n\n**Full Server Backup** (stored in `/home/sleepy/backups`):\n- 1 bac"
+  },
+  {
+    "q": "what's using the most RAM?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "top_processes",
+        {
+          "by": "ram"
+        }
+      ]
+    ],
+    "secs": 12.8,
+    "reply": "The process using the most RAM is **java** with **5,332 MB** (over 5 GB). Here's the full list of top RAM users:\n\n1. **java** - 5,332 MB  \n2. **netdata** - 159 MB  \n3. **go.d.plugin** - 120 MB  \n4. **MainThread** (x2) - 112 MB each  \n5. **dockerd** - 98 MB  \n6. **node** - 81 MB  \n7. **containerd** -"
+  },
+  {
+    "q": "how much disk space is left?",
+    "pass": false,
+    "fails": [
+      "expected one of ['disk_usage', 'get_health']"
+    ],
+    "calls": [],
+    "secs": 14.2,
+    "reply": "I need to know which directory's disk usage you want to check. Common options include /home, /var/www, or /home/sleepy/eugh. Let me know the path you're interested in."
+  },
+  {
+    "q": "is my gaming pc on?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "pc_status",
+        {}
+      ]
+    ],
+    "secs": 3.9,
+    "reply": "(no reply)"
+  },
+  {
+    "q": "add an idea: scheduled nightly minecraft backups",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "add_idea",
+        {
+          "category": "backup",
+          "text": "scheduled nightly minecraft backups"
+        }
+      ]
+    ],
+    "secs": 8.1,
+    "reply": "The idea was added as #0 (benchmark, not saved). The system says it's a benchmark and not saved, which might mean the idea tracker is in testing or there's a configuration issue. Would you like me to proceed with setting up a scheduled backup script for Minecraft?"
+  },
+  {
+    "q": "what's the weather like today?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "weather",
+        {}
+      ]
+    ],
+    "secs": 5.4,
+    "reply": "It's 26°C right now, with temperatures between 22–26°C today. A 5% chance of rain and 8 km/h wind."
+  },
+  {
+    "q": "what's in my Downloads folder on the gaming PC?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 7.3,
+    "reply": "I don't have a tool to access the gaming PC's file system. The `list_dir` tool only works on the home server's folders (like /home, /var/www, etc.), not the gaming PC. You'll need to check the gaming PC's Downloads folder directly through its interface or remote access method."
+  },
+  {
+    "q": "why did the minecraft server crash last night? find the root cause",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "lines": 50,
+          "unit": "eugh"
+        }
+      ],
+      [
+        "get_services",
+        {
+          "unit": "eugh"
+        }
+      ],
+      [
+        "get_health",
+        {}
+      ],
+      [
+        "read_file",
+        {
+          "lines": 50,
+          "path": "/home/sleepy/eugh/server.log"
+        }
+      ]
+    ],
+    "secs": 29.4,
+    "reply": "The Minecraft server crashed due to a systemd service failure (exit code 1) on 2026-09-23 at 06:17, but the logs don't show specific error details. The server is now running again, and current system metrics (CPU, RAM, disk) are normal. To debug further:\n\n1. **Check screen session logs** manually vi"
+  },
+  {
+    "q": "write me a bash script that rotates nginx logs",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [],
+    "secs": 21.0,
+    "reply": "I can help you create a simple log rotation script. Here's a basic example for nginx logs:\n\n```bash\n#!/bin/bash\n\n# Nginx log rotation script\nLOG_DIR=\"/var/log/nginx\"\nDATE=$(date +%Y-%m-%d)\n\n# Create backup with timestamp\ntar -czf ${LOG_DIR}/nginx-logs-${DATE}.tar.gz ${LOG_DIR}/access.log ${LOG_DIR}/"
+  },
+  {
+    "q": "hey dozer, how are you?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 2.3,
+    "reply": "I'm good, thanks! How can I assist you today?"
+  }
+]

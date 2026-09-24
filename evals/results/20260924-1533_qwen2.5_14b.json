@@ -1,0 +1,231 @@
+[
+  {
+    "q": "are my websites all up?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "site_check",
+        {}
+      ]
+    ],
+    "secs": 6.8,
+    "reply": "All your websites are up:\n\n- isaac-dev.eu: 200, 921 ms, cert 77 days left\n- dub.isaac-dev.eu: 200, 605 ms, cert 77 days left\n- monitor.isaac-dev.eu: 401, 811 ms, cert 77 days left (401 is expected for this site)\n- rickmanvault.com: 200, 250 ms, cert 39 days left"
+  },
+  {
+    "q": "how's the server doing?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_health",
+        {}
+      ]
+    ],
+    "secs": 2.9,
+    "reply": "Server is running fine:\n- CPU: 20% with load average 1.23, 1.18, 1.08\n- Temperature: 67°C\n- RAM: 6.7 GB used out of 12.1 GB (55%)\n- Disk: 69 GB used out of 465 GB (16%)\n- Uptime: 4 days, 19:10:13"
+  },
+  {
+    "q": "is anyone on minecraft?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_players",
+        {}
+      ]
+    ],
+    "secs": 2.3,
+    "reply": "No one is currently online on the Minecraft server."
+  },
+  {
+    "q": "show me the last 10 log lines of the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "lines": 10,
+          "unit": "eugh"
+        }
+      ]
+    ],
+    "secs": 11.7,
+    "reply": "Here are the last 10 log lines for the Minecraft server:\n\n```\n2026-09-23T06:17:07+00:00 theminipc systemd[1]: Started eugh.service - EUGH 2.7 Minecraft Server.\n2026-09-23T06:17:07+00:00 theminipc systemd[1]: eugh.service: Consumed 2d 16h 35min 8.534s CPU time over 3d 9h 52min 30.854s wall clock time"
+  },
+  {
+    "q": "is nginx running?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_services",
+        {
+          "unit": "nginx"
+        }
+      ]
+    ],
+    "secs": 0.7,
+    "reply": "nginx is running and active."
+  },
+  {
+    "q": "restart the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_stop",
+        {}
+      ],
+      [
+        "mc_start",
+        {}
+      ]
+    ],
+    "secs": 1.2,
+    "reply": "You've declined restarting the Minecraft server twice, marked as \"benchmark\". If you're ready, let me know and I'll restart it."
+  },
+  {
+    "q": "back up the minecraft world",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backup_now",
+        {}
+      ]
+    ],
+    "secs": 1.0,
+    "reply": "You've declined the Minecraft backup. If you change your mind, just let me know!"
+  },
+  {
+    "q": "what backups do I have?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backups",
+        {}
+      ]
+    ],
+    "secs": 5.8,
+    "reply": "Here are your backups:\n\n**Minecraft world backups** — 4 files, 36.7 GB total:\n- world-2026-09-22_0631.tar.gz — 9.2 GB — 22 Sep 2026 06:36\n- world-2026-09-20_1134.tar.gz — 9.2 GB — 20 Sep 2026 11:39\n- world-2026-09-07_0844.tar.gz — 9.2 GB — 07 Sep 2026 08:50\n- world-2026-08-31_1903.tar.gz — 9.2 GB — "
+  },
+  {
+    "q": "what's using the most RAM?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "top_processes",
+        {
+          "by": "ram"
+        }
+      ]
+    ],
+    "secs": 2.5,
+    "reply": "The process using the most RAM is `java`, with 5332 MB, which corresponds to the Minecraft server."
+  },
+  {
+    "q": "how much disk space is left?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/home"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/var/www"
+        }
+      ]
+    ],
+    "secs": 4.2,
+    "reply": "The home server has 373 GB of free space out of 465 GB total. Here are some directory sizes:\n- /var/www: 2.4M\n- /var/www/isaac-dev.eu: 2.0M\n- /var/www/rickmanvault: 412K\n- /var/www/html: 8.0K"
+  },
+  {
+    "q": "is my gaming pc on?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "pc_status",
+        {}
+      ]
+    ],
+    "secs": 2.0,
+    "reply": "Your gaming PC is off, but the Ollama brain is online."
+  },
+  {
+    "q": "add an idea: scheduled nightly minecraft backups",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "add_idea",
+        {
+          "category": "Automation",
+          "text": "Scheduled nightly Minecraft backups"
+        }
+      ]
+    ],
+    "secs": 1.4,
+    "reply": "I've added the idea for scheduled nightly Minecraft backups to your ideas tracker. Let's work on setting that up once we have a plan!"
+  },
+  {
+    "q": "what's the weather like today?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "weather",
+        {}
+      ]
+    ],
+    "secs": 2.3,
+    "reply": "It's 26°C now with a 5% chance of rain today. Temperatures will range from 22–26°C, and the wind is at 8 km/h."
+  },
+  {
+    "q": "what's in my Downloads folder on the gaming PC?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 1.1,
+    "reply": "I don't have a tool to list files on the gaming PC directly. I can check the Downloads folder on the home server if that's what you meant. Otherwise, you'll need to check it from the PC itself."
+  },
+  {
+    "q": "why did the minecraft server crash last night? find the root cause",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.2,
+    "reply": "This one's for Claude."
+  },
+  {
+    "q": "write me a bash script that rotates nginx logs",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.4,
+    "reply": "This one's for Claude. I don't create scripts myself."
+  },
+  {
+    "q": "hey dozer, how are you?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.4,
+    "reply": "I'm online and ready to help. How can you need today?"
+  }
+]

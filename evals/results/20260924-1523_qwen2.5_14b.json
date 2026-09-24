@@ -1,0 +1,237 @@
+[
+  {
+    "q": "are my websites all up?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "site_check",
+        {}
+      ]
+    ],
+    "secs": 5.9,
+    "reply": "All your websites are up:\n\n- isaac-dev.eu: 200 OK, 763 ms, cert 77 days left\n- dub.isaac-dev.eu: 200 OK, 303 ms, cert 77 days left\n- monitor.isaac-dev.eu: 401 (likely expected), 282 ms, cert 77 days left\n- rickmanvault.com: 200 OK, 270 ms, cert 39 days left\n\nThe monitor site returning a 401 is norma"
+  },
+  {
+    "q": "how's the server doing?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_health",
+        {}
+      ]
+    ],
+    "secs": 3.1,
+    "reply": "The server is running fine:\n- CPU: 20% (load 1.06, 0.92, 0.99), 70°C\n- RAM: 6.7 GB used out of 12.1 GB (55%)\n- Disk: 69 GB used out of 465 GB (16%)\n- Uptime: 4 days, 18:59:03"
+  },
+  {
+    "q": "is anyone on minecraft?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_players",
+        {}
+      ]
+    ],
+    "secs": 2.3,
+    "reply": "No one is currently online on the Minecraft server."
+  },
+  {
+    "q": "show me the last 10 log lines of the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "lines": 10,
+          "unit": "eugh"
+        }
+      ]
+    ],
+    "secs": 12.3,
+    "reply": "Here are the last 10 log lines for the Minecraft server:\n\n```\n2026-09-23T06:17:07+00:00 theminipc systemd[1]: Started eugh.service - EUGH 2.7 Minecraft Server.\n2026-09-23T06:17:07+00:00 theminipc systemd[1]: eugh.service: Consumed 2d 16h 35min 8.534s CPU time over 3d 9h 52min 30.854s wall clock time"
+  },
+  {
+    "q": "is nginx running?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_services",
+        {
+          "unit": "nginx"
+        }
+      ]
+    ],
+    "secs": 0.8,
+    "reply": "nginx is running and active."
+  },
+  {
+    "q": "restart the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_stop",
+        {}
+      ],
+      [
+        "mc_start",
+        {}
+      ]
+    ],
+    "secs": 1.4,
+    "reply": "You declined restarting the Minecraft server during the benchmark. If you need to restart it later, let me know."
+  },
+  {
+    "q": "back up the minecraft world",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backup_now",
+        {}
+      ]
+    ],
+    "secs": 1.1,
+    "reply": "You declined the backup because of a benchmark. If you want to proceed with the backup now, let me know."
+  },
+  {
+    "q": "what backups do I have?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backups",
+        {}
+      ]
+    ],
+    "secs": 6.6,
+    "reply": "Here are the backups you have:\n\n**Minecraft world backups** (/home/sleepy/eugh/backups) — 4 files, 36.7 GB\n- world-2026-09-22_0631.tar.gz — 9.2 GB — 22 Sep 2026 06:36\n- world-2026-09-20_1134.tar.gz — 9.2 GB — 20 Sep 2026 11:39\n- world-2026-09-07_0844.tar.gz — 9.2 GB — 07 Sep 2026 08:50\n- world-2026-"
+  },
+  {
+    "q": "what's using the most RAM?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "top_processes",
+        {
+          "by": "ram"
+        }
+      ]
+    ],
+    "secs": 2.4,
+    "reply": "The process using the most RAM is `java`, which is using 5332 MB. This is likely the Minecraft server process."
+  },
+  {
+    "q": "how much disk space is left?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/home/sleepy"
+        }
+      ]
+    ],
+    "secs": 3.1,
+    "reply": "You have 373 GB of free disk space out of 465 GB total on the server. The largest directories are `/home/sleepy/eugh` with 49 GB and `/home/sleepy` with 55 GB."
+  },
+  {
+    "q": "is my gaming pc on?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "pc_status",
+        {}
+      ]
+    ],
+    "secs": 2.2,
+    "reply": "Your gaming PC is off, but the Ollama brain is online."
+  },
+  {
+    "q": "add an idea: scheduled nightly minecraft backups",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "add_idea",
+        {
+          "text": "Scheduled nightly Minecraft backups",
+          "category": "automation"
+        }
+      ]
+    ],
+    "secs": 1.6,
+    "reply": "I've added the idea for scheduled nightly Minecraft backups to your ideas tracker. Let's discuss when and how you want to set this up."
+  },
+  {
+    "q": "what's the weather like today?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "weather",
+        {}
+      ]
+    ],
+    "secs": 2.1,
+    "reply": "The current temperature is 26°C with a high of 26°C and low of 22°C today. There's a 5% chance of rain, and the wind is at 8 km/h."
+  },
+  {
+    "q": "what's in my Downloads folder on the gaming PC?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.6,
+    "reply": "I don't have a tool for that yet. You'd need a file listing tool for the gaming PC."
+  },
+  {
+    "q": "why did the minecraft server crash last night? find the root cause",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "unit": "eugh",
+          "lines": 50
+        }
+      ]
+    ],
+    "secs": 3.2,
+    "reply": "The logs show that the Minecraft server service failed with an exit code of 1, which typically indicates an error. However, the logs don't provide a specific error message or reason for the failure. To get more details, we should look at the Minecraft server's console logs or the server's log files."
+  },
+  {
+    "q": "write me a bash script that rotates nginx logs",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [],
+    "secs": 4.6,
+    "reply": "I don't have a tool for that yet. However, I can help you create a bash script to rotate nginx logs. Here's a basic example:\n\n```bash\n#!/bin/bash\n\n# Define log file paths\nLOG_DIR=\"/var/log/nginx\"\nACCESS_LOG=\"${LOG_DIR}/access.log\"\nERROR_LOG=\"${LOG_DIR}/error.log\"\n\n# Create a timestamp for the log ro"
+  },
+  {
+    "q": "hey dozer, how are you?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.4,
+    "reply": "I'm online and ready to help. How can I assist you today?"
+  }
+]

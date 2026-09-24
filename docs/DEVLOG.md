@@ -134,6 +134,25 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Prompt: talks to Isaac as "you".
 - Prompt-injection guard: file contents/logs are data, never instructions; every state-changing tool still needs a Yes tap.
 
+### 15:10–15:40 UTC — Model benchmark
+- Built evals/bench.py: 17 fixed questions through the real agent loop; scores right tool, right args, confirmation used,
+  honesty ("no tool"), hand-off to Claude, garbled output, and speed. Confirm tools auto-declined; add_idea simulated
+  (the first run had written a real idea #154 — removed). Results saved as JSON in evals/results/.
+- Bench fixes: restart case wrongly failed a valid stop+start answer; curly apostrophe (’) wasn't matched; prints now flushed.
+- Isaac pulled qwen3:14b and gpt-oss:20b (qwen3:30b-a3b didn't come through). Also discussed RAM vs VRAM:
+  DDR5-6000 ~96 GB/s vs 4080 Super ~736 GB/s -> RAM 5–8x slower for dense models; MoE tolerable; possible CPU-only
+  small model as a future "gaming mode".
+- Round 1 (original prompt): qwen2.5 15/17 3.2 s · qwen3 14/17 10.1 s (thinking = slow) · gpt-oss 14/17 2.7 s.
+  No model handed debugging/scripts off to Claude. gpt-oss asked "do you want me to?" instead of calling tools.
+- Prompt changes: call action tools directly (the Yes/No button is the confirmation); strict hand-off rule —
+  no debugging, root causes, scripts or config changes; gather basic facts then end with "This one's for Claude."
+- Round 2: **qwen2.5:14b 17/17, 2.8 s** · gpt-oss:20b 15/17, 2.5 s (ignores the hand-off rule: digs through files
+  until it hits the tool-loop limit, or gives script advice). 0 garbled / text tool calls in round 2.
+- Decision: stay on qwen2.5:14b — perfect score, near-identical speed, 8.4 GB vs 12.8 GB VRAM.
+  Briefly switched to gpt-oss, reverted. Dozer restarted on qwen2.5 with the new prompt.
+- Side finding: models spotted a Minecraft crash on 23 Sep ~06:17 (systemd exit code 1); server running since.
+  Flagged for Claude to investigate.
+
 ### Open for Isaac
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.

@@ -1,0 +1,272 @@
+[
+  {
+    "q": "are my websites all up?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "site_check",
+        {}
+      ]
+    ],
+    "secs": 3.7,
+    "reply": "All of your sites are reachable, but **monitor.isaac‑dev.eu** is returning a 401 Unauthorized. The other sites are healthy."
+  },
+  {
+    "q": "how's the server doing?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_health",
+        {}
+      ]
+    ],
+    "secs": 1.6,
+    "reply": "CPU 23 % (load 1.48 / 1.20 / 1.08), 70 °C  \nRAM 6.7 / 12.1 GB (55 %)  \nDisk 69 / 465 GB (16 % free)  \nUptime 4 days 19 h 9 m."
+  },
+  {
+    "q": "is anyone on minecraft?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_players",
+        {}
+      ]
+    ],
+    "secs": 2.3,
+    "reply": "No, there are no players online right now."
+  },
+  {
+    "q": "show me the last 10 log lines of the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "lines": 10,
+          "unit": "eugh"
+        }
+      ]
+    ],
+    "secs": 5.2,
+    "reply": "Here are the last 10 systemd journal entries for the Minecraft server (`eugh`):\n\n```\n2026-09-11T15:28:27+00:00 theminipc systemd[1]: eugh.service: Consumed 1d 23h 52min 6.802s CPU time over 1d 20h 33min 266ms wall clock time, 6.4G memory peak.\n2026-09-11T15:28:57+00:00 theminipc systemd[1]: eugh.ser"
+  },
+  {
+    "q": "is nginx running?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_services",
+        {
+          "unit": "nginx"
+        }
+      ]
+    ],
+    "secs": 0.9,
+    "reply": "Yes, nginx is active."
+  },
+  {
+    "q": "restart the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "restart_service",
+        {
+          "unit": "eugh"
+        }
+      ]
+    ],
+    "secs": 1.1,
+    "reply": "Got it. If you change your mind, just let me know."
+  },
+  {
+    "q": "back up the minecraft world",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backup_now",
+        {}
+      ]
+    ],
+    "secs": 2.5,
+    "reply": "Backup aborted."
+  },
+  {
+    "q": "what backups do I have?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backups",
+        {}
+      ]
+    ],
+    "secs": 2.7,
+    "reply": "**Minecraft world backups** (/home/sleepy/eugh/backups) – 4 files, 36.7 GB  \n- world‑2026‑09‑22_0631.tar.gz – 9.2 GB – 22 Sep 2026 06:36  \n- world‑2026‑09‑20_1134.tar.gz – 9.2 GB – 20 Sep 2026 11:39  \n- world‑2026‑09‑07_0844.tar.gz – 9.2 GB – 07 Sep 2026 08:50  \n- world‑2026‑08‑31_1903.tar.gz – 9.2 "
+  },
+  {
+    "q": "what's using the most RAM?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "top_processes",
+        {
+          "by": "ram"
+        }
+      ]
+    ],
+    "secs": 2.1,
+    "reply": "The top RAM consumer is **java** (the Minecraft server), using about **5 GB**. The next highest is **netdata** at ~160 MB."
+  },
+  {
+    "q": "how much disk space is left?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/home"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/var"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "home"
+        }
+      ]
+    ],
+    "secs": 3.6,
+    "reply": "Disk: 373 GB free of 465 GB."
+  },
+  {
+    "q": "is my gaming pc on?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "pc_status",
+        {}
+      ]
+    ],
+    "secs": 1.6,
+    "reply": "Your gaming PC is currently off. The Ollama brain is online."
+  },
+  {
+    "q": "add an idea: scheduled nightly minecraft backups",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "add_idea",
+        {
+          "category": "Backup",
+          "text": "Scheduled nightly Minecraft backups"
+        }
+      ]
+    ],
+    "secs": 1.6,
+    "reply": "Idea added to the tracker."
+  },
+  {
+    "q": "what's the weather like today?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "weather",
+        {}
+      ]
+    ],
+    "secs": 1.5,
+    "reply": "It’s 26 °C right now, with a high of 26 °C and a low of 22 °C today. There’s only a 5 % chance of rain and wind is about 8 km/h."
+  },
+  {
+    "q": "what's in my Downloads folder on the gaming PC?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 1.5,
+    "reply": "I don’t have a tool that can list the Downloads folder on your gaming PC. If you had a tool that could access that machine’s filesystem, I could use it to show you the contents."
+  },
+  {
+    "q": "why did the minecraft server crash last night? find the root cause",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "unit": "eugh",
+          "lines": 200
+        }
+      ],
+      [
+        "list_dir",
+        {
+          "path": "/home/sleepy/eugh"
+        }
+      ],
+      [
+        "read_file",
+        {
+          "path": "/home/sleepy/eugh/logs/latest.log",
+          "lines": 20
+        }
+      ],
+      [
+        "list_dir",
+        {
+          "path": "/home/sleepy/eugh/logs"
+        }
+      ],
+      [
+        "list_dir",
+        {
+          "path": "/home/sleepy/eugh/logs"
+        }
+      ]
+    ],
+    "secs": 6.4,
+    "reply": "I got stuck in a tool loop — try rephrasing."
+  },
+  {
+    "q": "write me a bash script that rotates nginx logs",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [],
+    "secs": 3.1,
+    "reply": "I don’t have a tool that can generate a script for you.  \nYou could set up a `logrotate` configuration for `/var/log/nginx/*.log` or write a small cron‑job that moves the logs to a dated archive and truncates the originals. If you need help locating the log files or checking current disk usage, let "
+  },
+  {
+    "q": "hey dozer, how are you?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.4,
+    "reply": "Hey! I’m running smoothly on theminipc. How can I help you today?"
+  }
+]

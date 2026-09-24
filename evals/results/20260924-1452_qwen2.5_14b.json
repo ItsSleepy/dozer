@@ -1,0 +1,285 @@
+[
+  {
+    "q": "are my websites all up?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "site_check",
+        {}
+      ]
+    ],
+    "secs": 8.6,
+    "reply": "All your websites are up:\n\n- isaac-dev.eu: 200, 612 ms, cert 77 days\n- dub.isaac-dev.eu: 200, 600 ms, cert 77 days\n- monitor.isaac-dev.eu: 401, 738 ms, cert 77 days (note the 401 status)\n- rickmanvault.com: 200, 704 ms, cert 39 days\n\nThe monitor site has a 401 status, which is expected since it's no"
+  },
+  {
+    "q": "how's the server doing?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_health",
+        {}
+      ]
+    ],
+    "secs": 3.3,
+    "reply": "The server is running well. Here are the current stats:\n- CPU: 20% with a load of 2.35, 1.60, 1.42 and temperature of 72°C\n- RAM: 6.7 GB used out of 12.1 GB (55%)\n- Disk: 69 GB used out of 465 GB (16%)\n- Uptime: 4 days, 18 hours, 27 minutes, 53 seconds"
+  },
+  {
+    "q": "is anyone on minecraft?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_players",
+        {}
+      ]
+    ],
+    "secs": 2.3,
+    "reply": "No one is currently online on the Minecraft server."
+  },
+  {
+    "q": "show me the last 10 log lines of the minecraft server",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "lines": 10,
+          "unit": "eugh"
+        }
+      ]
+    ],
+    "secs": 12.1,
+    "reply": "Here are the last 10 log lines for the Minecraft server:\n\n```\n2026-09-23T06:17:07+00:00 theminipc systemd[1]: eugh.service: Consumed 2d 16h 35min 8.534s CPU time over 3d 9h 52min 30.854s wall clock time, 6G memory peak.\n2026-09-23T06:17:07+00:00 theminipc systemd[1]: Started eugh.service - EUGH 2.7 "
+  },
+  {
+    "q": "is nginx running?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "get_services",
+        {
+          "unit": "nginx"
+        }
+      ]
+    ],
+    "secs": 1.0,
+    "reply": "nginx กำลังทำงานอยู่ครับ"
+  },
+  {
+    "q": "restart the minecraft server",
+    "pass": false,
+    "fails": [
+      "unit not in ['eugh'] (got [])"
+    ],
+    "calls": [
+      [
+        "mc_stop",
+        {}
+      ],
+      [
+        "mc_start",
+        {}
+      ]
+    ],
+    "secs": 1.3,
+    "reply": "You declined restarting the Minecraft server during the benchmark. If you need to restart it later, let me know."
+  },
+  {
+    "q": "back up the minecraft world",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backup_now",
+        {}
+      ]
+    ],
+    "secs": 1.1,
+    "reply": "You declined the backup. If you want to do it now, let me know."
+  },
+  {
+    "q": "what backups do I have?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "mc_backups",
+        {}
+      ]
+    ],
+    "secs": 5.9,
+    "reply": "Here are your current backups:\n\n**Minecraft world backups** — 4 files, 36.7 GB total\n- world-2026-09-22_0631.tar.gz — 9.2 GB — 22 Sep 2026 06:36\n- world-2026-09-20_1134.tar.gz — 9.2 GB — 20 Sep 2026 11:39\n- world-2026-09-07_0844.tar.gz — 9.2 GB — 07 Sep 2026 08:50\n- world-2026-08-31_1903.tar.gz — 9."
+  },
+  {
+    "q": "what's using the most RAM?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "top_processes",
+        {
+          "by": "ram"
+        }
+      ]
+    ],
+    "secs": 2.3,
+    "reply": "The process using the most RAM is `java`, which is using 5329 MB. This is likely the Minecraft server process."
+  },
+  {
+    "q": "how much disk space is left?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ],
+      [
+        "disk_usage",
+        {
+          "path": "/"
+        }
+      ]
+    ],
+    "secs": 4.0,
+    "reply": "I got stuck in a tool loop — try rephrasing."
+  },
+  {
+    "q": "is my gaming pc on?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "pc_status",
+        {}
+      ]
+    ],
+    "secs": 1.8,
+    "reply": "Your gaming PC is off, but the Ollama brain is online."
+  },
+  {
+    "q": "add an idea: scheduled nightly minecraft backups",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "add_idea",
+        {
+          "category": "automation",
+          "text": "Scheduled nightly Minecraft backups"
+        }
+      ]
+    ],
+    "secs": 2.8,
+    "reply": "I've added the idea for scheduled nightly Minecraft backups to your automation list."
+  },
+  {
+    "q": "what's the weather like today?",
+    "pass": true,
+    "fails": [],
+    "calls": [
+      [
+        "weather",
+        {}
+      ]
+    ],
+    "secs": 2.0,
+    "reply": "The current temperature is 26°C. Today's forecast predicts temperatures between 22–26°C with a 5% chance of rain and winds at 8 km/h."
+  },
+  {
+    "q": "what's in my Downloads folder on the gaming PC?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.6,
+    "reply": "I don't have a tool for that yet. You'd need a file listing tool for the gaming PC's Downloads folder."
+  },
+  {
+    "q": "why did the minecraft server crash last night? find the root cause",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [
+      [
+        "get_logs",
+        {
+          "unit": "eugh",
+          "lines": 50
+        }
+      ],
+      [
+        "get_logs",
+        {
+          "lines": 100,
+          "unit": "eugh"
+        }
+      ],
+      [
+        "get_logs",
+        {
+          "lines": 100,
+          "unit": "eugh"
+        }
+      ],
+      [
+        "read_file",
+        {
+          "lines": 100,
+          "path": "/home/sleepy/eugh/logs/latest.log"
+        }
+      ],
+      [
+        "read_file",
+        {
+          "lines": 100,
+          "path": "/home/sleepy/eugh/logs/latest.log"
+        }
+      ]
+    ],
+    "secs": 10.0,
+    "reply": "I got stuck in a tool loop — try rephrasing."
+  },
+  {
+    "q": "write me a bash script that rotates nginx logs",
+    "pass": false,
+    "fails": [
+      "reply lacks ['claude']"
+    ],
+    "calls": [],
+    "secs": 5.7,
+    "reply": "I don't have a tool for that yet. However, I can help you write a bash script to rotate nginx logs. Here's a basic example of how you might do it:\n\n```bash\n#!/bin/bash\n\n# Define the log file paths\nLOG_PATH=\"/var/log/nginx\"\n\n# Define the log files to rotate\nLOG_FILES=(\"access.log\" \"error.log\")\n\n# Cre"
+  },
+  {
+    "q": "hey dozer, how are you?",
+    "pass": true,
+    "fails": [],
+    "calls": [],
+    "secs": 0.4,
+    "reply": "I'm online and ready to help you. How can I assist you today?"
+  }
+]
