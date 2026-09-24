@@ -290,10 +290,12 @@ REGISTRY = {
 }
 
 
-from . import ops, medal, pcagent  # noqa: E402  (after _run/UNIT_RE are defined)
+from . import ops, medal, pcagent, reminders  # noqa: E402  (after _run/UNIT_RE are defined)
 REGISTRY.update(ops.OPS)
 REGISTRY.update({"medal_clips": medal.medal_clips, "post_clip": medal.post_clip})
 REGISTRY.update(pcagent.AGENT_TOOLS)
+REGISTRY.update({"set_reminder": reminders.set_reminder, "list_reminders": reminders.list_reminders,
+                 "cancel_reminder": reminders.cancel_reminder, "snooze_reminder": reminders.snooze})
 CONFIRM_TOOLS |= ops.CONFIRM_OPS | {"post_clip"} | pcagent.CONFIRM_AGENT
 
 

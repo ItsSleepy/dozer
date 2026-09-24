@@ -9,7 +9,7 @@ import psutil
 from aiohttp import web
 
 from . import config as C
-from . import llm, scheduler, tools
+from . import llm, reminders, scheduler, tools
 from .audit import audit, log
 from .commands import HELP, route
 
@@ -80,6 +80,40 @@ async def execute_tool(dest, name: str, args: dict) -> str:
     return await tools.call(name, **args)
 
 
+# ── reminders ───────────────────────────────────────────────────────────────
+
+class ReminderView(discord.ui.View):
+    def __init__(self, rid: int):
+        super().__init__(timeout=6 * 3600)
+        self.rid = rid
+
+    async def interaction_check(self, i: discord.Interaction) -> bool:
+        return i.user.id == C.OWNER_ID
+
+    async def _done(self, i: discord.Interaction, note: str):
+        await i.response.edit_message(content=i.message.content + f"\n*{note}*", view=None)
+        self.stop()
+
+    @discord.ui.button(label="Done", style=discord.ButtonStyle.success)
+    async def done(self, i: discord.Interaction, _):
+        audit("reminder_ack", id=self.rid)
+        await self._done(i, "✓ done")
+
+    @discord.ui.button(label="Snooze 10m", style=discord.ButtonStyle.secondary)
+    async def s10(self, i: discord.Interaction, _):
+        await self._done(i, await reminders.snooze(self.rid, 10))
+
+    @discord.ui.button(label="Snooze 1h", style=discord.ButtonStyle.secondary)
+    async def s60(self, i: discord.Interaction, _):
+        await self._done(i, await reminders.snooze(self.rid, 60))
+
+
+async def deliver_reminder(r: dict, late: bool):
+    due = datetime.fromisoformat(r["due"]) if not r.get("repeat") else None
+    tail = " *(late — Dozer was offline)*" if late else ""
+    await dm(f"⏰ **Reminder:** {r['text']}{tail}", ReminderView(r["id"]))
+
+
 # ── scheduled jobs ──────────────────────────────────────────────────────────
 
 async def run_job(job: dict):
@@ -126,6 +160,7 @@ async def briefing_text() -> str:
         f"**Services:** {'all up' if not down else 'down: ' + ', '.join(down)}",
         f"**Minecraft:** {await tools.mc_status()}",
         f"**Last world backup:** {backup_age_line()}",
+        *([f"**Today's reminders:**\n" + "\n".join(f"• {l}" for l in reminders.today_lines())] if reminders.today_lines() else []),
         *(["⚠️ **Minecraft is running an outdated Java** — `restart mc` when nobody's on."] if tools.java_stale() else []),
         f"**Gaming PC:** {(await tools.pc_status()).replace(chr(10), ' · ')}",
         f"**Alerts since last briefing:** {len(alerts_since_briefing)}"
@@ -228,6 +263,11 @@ async def handle(message: discord.Message):
         return await send(dest, HELP)
     if r and r.tool == "briefing":
         return await send(dest, await briefing_text())
+    if r and r.tool == "remind":
+        parts = reminders.split_request(r.args["text"])
+        if parts and reminders.parse_when(parts[0]):
+            return await send(dest, await tools.call("set_reminder", when=parts[0], text=parts[1]))
+        r = None                     # vague time ("after dinner") -> let the brain interpret it
     if r and r.tool == "schedules":
         return await send(dest, scheduler.describe())
     if r and r.tool == "schedule_add":
@@ -282,6 +322,8 @@ async def on_ready():
         client._bg = True
         tools.ops.set_notifier(dm)
         scheduler.set_runner(run_job)
+        reminders.set_deliver(deliver_reminder)
+        asyncio.create_task(reminders.loop())
         tools.pcagent.set_notifier(dm)
         asyncio.create_task(tools.pcagent.loop())
         asyncio.create_task(scheduler.loop())

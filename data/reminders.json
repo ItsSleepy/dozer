@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "text": "Call Chris about the server",
+    "due": "2026-09-24T20:00+02:00",
+    "repeat": null,
+    "created": "2026-09-24T19:39+02:00",
+    "done": true
+  }
+]

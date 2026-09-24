@@ -94,6 +94,11 @@ TOOL_SCHEMAS = [
     _fn("pc_launch", "Launch an app on the gaming PC: cs2, steam, discord, medal, roblox.", {"app": {"type": "string"}}, ["app"]),
     _fn("pc_media", "Media keys on the gaming PC: play_pause, next, prev, vol_up, vol_down, mute.",
         {"key": {"type": "string", "enum": ["play_pause", "next", "prev", "vol_up", "vol_down", "mute"]}, "times": {"type": "integer"}}, ["key"]),
+    _fn("set_reminder", "Set a reminder for Isaac. 'when' must be a phrase like: in 20m, in 2 hours, at 18:00, tomorrow at 9, "
+        "on friday at 17:30, on 28/09 at 10, every day at 22:00, every weekday at 8. Convert vague times yourself "
+        "(e.g. 'after dinner' -> 'at 20:00').", {"when": {"type": "string"}, "text": {"type": "string"}}, ["when", "text"]),
+    _fn("list_reminders", "List Isaac's upcoming reminders."),
+    _fn("cancel_reminder", "Cancel a reminder by id.", {"rid": {"type": "integer"}}, ["rid"]),
     _fn("docker_ps", "List Docker containers and their status."),
     _fn("docker_restart", "Restart a Docker container (asks first).", {"name": {"type": "string"}}, ["name"]),
 ]
@@ -145,7 +150,10 @@ def _looks_garbled(text: str) -> bool:
 async def run(history: list, user_text: str, execute_tool) -> str:
     """Agent loop: model -> tools -> model, max 5 rounds.
     execute_tool(name, args) handles confirmation and returns a result string."""
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}, *history,
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    now = datetime.now(ZoneInfo(C.TZ_NAME)).strftime("%A %d %B %Y, %H:%M")
+    messages = [{"role": "system", "content": SYSTEM_PROMPT + f"\n\nCurrent date/time (Malta): {now}"}, *history,
                 {"role": "user", "content": user_text}]
     retried = False
     for _ in range(5):

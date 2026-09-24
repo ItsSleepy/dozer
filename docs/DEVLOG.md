@@ -240,6 +240,18 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - From now on: Java updates no longer restart MC; Dozer alerts; restarts/stops/backups go through RCON.
 - Note: server logs "Can't keep up! … 217 ticks behind" right after start-up (normal while chunks load; watch if it persists).
 
+### ~17:55 UTC — Reminders
+- dozer/reminders.py, stored in data/reminders.json. Time phrases: in 20m / in 1h 30m / at 18:00 / at 6pm / tomorrow (09:00) /
+  tonight (20:00) / on friday at 17:30 / on 28/09 at 10 / on 01/01/2027 / noon. Repeating: every day|weekday|<weekday> at T.
+  "at 9" after 9 -> tomorrow. Tested 20 phrases; fixed "every weekday at 8" returning a time already passed today.
+- Delivery loop every 15 s; DM with Done / Snooze 10m / Snooze 1h buttons; reminders due while Dozer was down are sent
+  on start-up marked late. Snoozing a repeating reminder creates a one-off copy.
+- Commands: remind me …, reminders, cancel reminder <id>, snooze <id> [10m|1h|30]. Brain tools set/list/cancel.
+  Vague times ("after dinner") fall through to the brain, which picks a time — tested: "after dinner" -> 20:00.
+- System prompt now includes the current Malta date/time.
+- Briefing lists today's reminders.
+- Test reminder #1 (call Chris, 20:00) cancelled so it wouldn't fire.
+
 ### Open for Isaac
 - [x] Install needrestart-eugh.conf + eugh-rcon-stop.conf (sudo), then `restart mc` when nobody's on to switch RCON on.
 - [ ] Check the router doesn't forward port 25575.

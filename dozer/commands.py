@@ -29,12 +29,21 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `docker` · `docker restart <name>` (asks) · `ls <path>` · `read <file> [lines]`
 `help` — this list
 
+**Reminders**
+`remind me in 20m to …` · `remind me at 18:00 to …` · `remind me tomorrow at 9 to …`
+`remind me on friday at 17:30 to …` · `remind me every day at 22:00 to …` · `reminders` · `cancel reminder <id>` · `snooze <id> 10m`
+
 **Scheduled tasks**
 `schedules` — list · `schedule daily 04:00 <command>` · `schedule weekly sun 04:00 <command>`
 `schedule every 6h <command>` (min 15m) · `unschedule <id>` · `pause <id>` · `resume <id>`"""
 
 _P = [
     (r"^(help|commands|\?)$", lambda m: Route("help")),
+    (r"^(please )?remind me .+$", lambda m: Route("remind", {"text": m[0]})),
+    (r"^(reminders|my reminders|list reminders)$", lambda m: Route("list_reminders")),
+    (r"^(cancel|delete|remove) reminder #?(\d+)$", lambda m: Route("cancel_reminder", {"rid": int(m[2])})),
+    (r"^snooze #?(\d+)(?: (\d+)\s*(m|min|mins|h|hr|hours?)?)?$", lambda m: Route("snooze_reminder",
+        {"rid": int(m[1]), "minutes": int(m[2] or 10) * (60 if (m[3] or "m").startswith("h") else 1)})),
     (r"^(schedules?|scheduled|jobs)$", lambda m: Route("schedules")),
     (r"^schedule (daily \d{1,2}:\d{2}|weekly (?:mon|tue|wed|thu|fri|sat|sun) \d{1,2}:\d{2}|every \d+[hm]) (.+)$",
      lambda m: Route("schedule_add", {"spec": m[1], "command": m[2]})),
