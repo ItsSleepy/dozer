@@ -86,14 +86,22 @@ TOOL_SCHEMAS = [
     _fn("post_clip", "Post one of Isaac's Medal clips to a channel in the BMW Discord server (default faze_clipz). "
         "which = 1 for the newest (after the game filter), 2 for the one before, etc. Asks first.",
         {"which": {"type": "integer"}, "game": {"type": "string"}, "channel": {"type": "string"}, "note": {"type": "string"}}),
+    _fn("pc_info", "Gaming PC details from its agent: uptime, idle time, games running, GPU load/VRAM/temperature."),
+    _fn("pc_power", "Power the gaming PC: off, restart, sleep or lock (asks first).",
+        {"action": {"type": "string", "enum": ["off", "restart", "sleep", "lock"]}}, ["action"]),
+    _fn("pc_cancel_power", "Cancel a pending power-off/restart of the gaming PC."),
+    _fn("pc_launch", "Launch an app on the gaming PC: cs2, steam, discord, medal, roblox.", {"app": {"type": "string"}}, ["app"]),
+    _fn("pc_media", "Media keys on the gaming PC: play_pause, next, prev, vol_up, vol_down, mute.",
+        {"key": {"type": "string", "enum": ["play_pause", "next", "prev", "vol_up", "vol_down", "mute"]}, "times": {"type": "integer"}}, ["key"]),
     _fn("docker_ps", "List Docker containers and their status."),
     _fn("docker_restart", "Restart a Docker container (asks first).", {"name": {"type": "string"}}, ["name"]),
 ]
 
 
 async def chat(messages: list, tools: bool = True) -> dict:
+    from . import pcagent
     payload = {"model": C.OLLAMA_MODEL, "messages": messages, "stream": False,
-               "options": {"temperature": 0.3}}
+               "options": {"temperature": 0.3}, "keep_alive": pcagent.keep_alive()}
     if tools:
         payload["tools"] = TOOL_SCHEMAS
     audit("llm_request", model=C.OLLAMA_MODEL, last=messages[-1].get("content", "")[:500])

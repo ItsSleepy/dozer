@@ -196,7 +196,22 @@ Decision (Isaac): Dozer handles routine chores; crash debugging, config edits an
 - Commands: `clips [game] [n]`, `post clip [n] [game] [to <channel>]` (confirm shows the exact clip + link). Brain tools too.
 - Fix: dates now include the year when not this year (13 Mar 2026 vs 09 Apr 2025 looked out of order).
 
+### ~17:10 UTC — Windows agent
+- agent/dozer_agent.py (delivered to Isaac as a drop-in file + install_dozer_agent.ps1). Stdlib-only Python, port 8766,
+  accepts only theminipc (192.168.1.92 / .100) + shared secret header (AGENT_SECRET in .env). Logs to dozer_agent.log.
+  Endpoints: GET /status (uptime, idle via GetLastInputInfo, running games from a process list, nvidia-smi GPU stats),
+  POST /power (off/restart with delay + cancel, sleep, lock), /launch (whitelist: cs2, steam, discord, medal, roblox), /media (media keys).
+  Installer: finds/installs Python, copies to %LOCALAPPDATA%\DozerAgent, LAN-only firewall rule, logon scheduled task (hidden,
+  auto-restart), starts it.
+- Dozer side dozer/pcagent.py: tools pc_info, pc_power (confirm), pc_cancel_power, pc_launch, pc_media; commands
+  `pc info`, `pc off|restart|sleep|lock`, `cancel power`, `launch <app>`, `play/pause/next/prev/mute`, `vol up|down [n]`.
+- Auto power-off: armed only when Dozer's WoL actually woke the PC (brain was offline). Disarmed the moment Isaac uses the PC.
+  Fires after 30 min idle, no game running, GPU < 30%: DMs Isaac and powers off with a 2-min grace (`cancel power`).
+- Gaming detection: agent polled every 60 s; while a game runs, Ollama keep_alive = 0 (model unloads right after each answer,
+  VRAM goes back to the game); otherwise 5 min.
+
 ### Open for Isaac
+- [ ] Install the Windows agent (install_dozer_agent.ps1) and run `pc info`.
 - [x] Gaming PC: install Ollama, OLLAMA_HOST=0.0.0.0, allow 11434 on LAN, start with Windows, pull 2-3 models to test.
 - [x] Install deploy/dozer.service (keeps Dozer running permanently), then stop run-loop.sh.
 - [x] Install deploy/dozer-restart + deploy/dozer-sudoers (restart any service). Also fix the stale php8.3-fpm sudoers rule -> php8.5-fpm.

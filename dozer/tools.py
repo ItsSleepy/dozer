@@ -193,7 +193,12 @@ async def wake_pc() -> str:
     if not C.PC_MAC:
         return "PC_MAC not configured."
     code, out = await _run("wakeonlan", "-i", C.WOL_BROADCAST, C.PC_MAC)
-    return "Wake-on-LAN packet sent." if code == 0 else f"WoL failed: {out}"
+    if code == 0:
+        from . import pcagent
+        if not await brain_online():
+            pcagent.mark_woken()        # only arm auto power-off if the PC was actually off
+        return "Wake-on-LAN packet sent."
+    return f"WoL failed: {out}"
 
 
 async def add_idea(text: str, category: str = "Quality of life") -> str:
@@ -225,10 +230,11 @@ REGISTRY = {
 }
 
 
-from . import ops, medal  # noqa: E402  (after _run/UNIT_RE are defined)
+from . import ops, medal, pcagent  # noqa: E402  (after _run/UNIT_RE are defined)
 REGISTRY.update(ops.OPS)
 REGISTRY.update({"medal_clips": medal.medal_clips, "post_clip": medal.post_clip})
-CONFIRM_TOOLS |= ops.CONFIRM_OPS | {"post_clip"}
+REGISTRY.update(pcagent.AGENT_TOOLS)
+CONFIRM_TOOLS |= ops.CONFIRM_OPS | {"post_clip"} | pcagent.CONFIRM_AGENT
 
 
 async def call(name: str, **args) -> str:

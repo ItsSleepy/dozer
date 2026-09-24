@@ -272,6 +272,8 @@ async def on_ready():
         client._bg = True
         tools.ops.set_notifier(dm)
         scheduler.set_runner(run_job)
+        tools.pcagent.set_notifier(dm)
+        asyncio.create_task(tools.pcagent.loop())
         asyncio.create_task(scheduler.loop())
         asyncio.create_task(watchdog_loop())
         asyncio.create_task(briefing_loop())

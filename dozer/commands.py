@@ -15,7 +15,9 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `logs <unit> [lines]` — journal tail · `restart <unit>` — asks first
 `mc` — Minecraft status · `who's on` — players online
 `mc <command>` — console command, asks first
-`pc` — gaming PC + brain status · `wake pc` — Wake-on-LAN
+`pc` — gaming PC + brain status · `pc info` — idle, games, GPU · `wake pc` — Wake-on-LAN
+`pc off|restart|sleep|lock` (asks) · `cancel power` · `launch cs2|steam|discord|medal|roblox`
+`play` / `pause` · `next` · `prev` · `mute` · `vol up|down [n]`
 `backups` — Minecraft backups · `weather` · `briefing` — morning briefing now
 `idea <text>` — add to the ideas tracker
 `clips [game] [n]` — recent Medal clips · `post clip [n] [game] [to <channel>]` — posts to BMW (asks)
@@ -47,6 +49,15 @@ _P = [
     (r"^mc (.+)$", lambda m: Route("mc_command", {"command": m[1]}, f"Send `{m[1]}` to the Minecraft console?")),
     (r"^(pc|is (my )?pc on|pc status|brain)\??$", lambda m: Route("pc_status")),
     (r"^wake( up)?( my)?( the)? pc$", lambda m: Route("wake_pc")),
+    (r"^pc (info|details)$", lambda m: Route("pc_info")),
+    (r"^pc (off|restart|sleep|lock)$", lambda m: Route("pc_power", {"action": m[1].lower()}, f"Gaming PC: **{m[1].lower()}**?")),
+    (r"^cancel( the)? (power|power ?off|restart)$", lambda m: Route("pc_cancel_power")),
+    (r"^(?:launch|open|start) (cs2|steam|discord|medal|roblox)$", lambda m: Route("pc_launch", {"app": m[1].lower()})),
+    (r"^(play|pause|play/pause)$", lambda m: Route("pc_media", {"key": "play_pause"})),
+    (r"^(next|skip)$", lambda m: Route("pc_media", {"key": "next"})),
+    (r"^(prev|previous|back)$", lambda m: Route("pc_media", {"key": "prev"})),
+    (r"^mute$", lambda m: Route("pc_media", {"key": "mute"})),
+    (r"^vol(?:ume)? (up|down)(?: (\d+))?$", lambda m: Route("pc_media", {"key": f"vol_{m[1].lower()}", "times": int(m[2] or 5)})),
     (r"^weather$", lambda m: Route("weather")),
     (r"^clips?(?: (.+?))?(?: (\d+))?$", lambda m: Route("medal_clips", {"game": m[1] or "", "n": int(m[2] or 5)})),
     (r"^post (?:my )?clip(?: (\d+))?(?: (?!to )(.+?))?(?: to #?(\S+))?$",
