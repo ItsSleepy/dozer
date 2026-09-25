@@ -14,7 +14,7 @@ class Prefs(ctx: Context) {
         get() = p.getString("picoKey", "")!!
         set(v) = p.edit().putString("picoKey", v.trim()).apply()
     var sensitivity: Float
-        get() = p.getFloat("sensitivity", 0.6f)
+        get() = p.getFloat("sensitivity", 0.25f)
         set(v) = p.edit().putFloat("sensitivity", v).apply()
     var listening: Boolean
         get() = p.getBoolean("listening", false)

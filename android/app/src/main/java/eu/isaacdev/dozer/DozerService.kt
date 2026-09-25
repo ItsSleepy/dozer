@@ -1,8 +1,5 @@
 package eu.isaacdev.dozer
 
-import ai.picovoice.porcupine.Porcupine
-import ai.picovoice.porcupine.PorcupineManager
-import ai.picovoice.porcupine.PorcupineManagerCallback
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -41,10 +38,10 @@ class DozerService : Service() {
     private lateinit var prefs: Prefs
     private lateinit var api: DozerApi
     private val worker = Executors.newSingleThreadExecutor()
-    private var porcupine: PorcupineManager? = null
+    private var wake: WakeWord? = null
     private var tts: TextToSpeech? = null
     private var busy = false
-    private var wakeWordLabel = "none"
+    private val wakeWordLabel = "\"Hey Dozer\""
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -60,7 +57,7 @@ class DozerService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP -> { prefs.listening = false; stopSelf(); return START_NOT_STICKY }
-            ACTION_TALK -> { ensureForeground(); worker.execute { converse() } }
+            ACTION_TALK -> { ensureForeground(); worker.execute { wake?.stop(); converse(); if (prefs.listening && wake != null) listen() } }
             else -> { ensureForeground(); worker.execute { startWakeWord() } }
         }
         return START_STICKY
@@ -96,28 +93,25 @@ class DozerService : Service() {
 
     // ── wake word ──────────────────────────────────────────────────────────
     private fun startWakeWord() {
-        if (prefs.picoKey.isBlank()) { status("Add your Picovoice AccessKey to enable the wake word"); return }
         try {
-            porcupine?.delete()
-            val cb = PorcupineManagerCallback { worker.execute { onWake() } }
-            val b = PorcupineManager.Builder().setAccessKey(prefs.picoKey).setSensitivity(prefs.sensitivity)
-            val custom = wakeWordFile(this)
-            if (custom.exists()) { b.setKeywordPath(custom.absolutePath); wakeWordLabel = "\"Hey Dozer\"" }
-            else { b.setKeyword(Porcupine.BuiltInKeyword.JARVIS); wakeWordLabel = "\"Jarvis\" (import Hey Dozer to switch)" }
-            porcupine = b.build(applicationContext, cb)
-            porcupine?.start()
+            if (wake == null) wake = WakeWord(assets, prefs.sensitivity)
             prefs.listening = true
-            status("Listening for $wakeWordLabel")
+            listen()
         } catch (e: Exception) {
             status("Wake word error: ${e.message}")
         }
     }
 
+    private fun listen() {
+        wake?.start { worker.execute { onWake() } }
+        status("Listening for $wakeWordLabel")
+    }
+
     private fun onWake() {
         if (busy) return
-        try { porcupine?.stop() } catch (_: Exception) {}
+        wake?.stop()
         converse()
-        try { porcupine?.start(); status("Listening for $wakeWordLabel") } catch (_: Exception) {}
+        if (prefs.listening && wake != null) listen()
     }
 
     // ── one conversation (with follow-ups when Dozer asks a question) ─────
@@ -149,7 +143,7 @@ class DozerService : Service() {
             am.abandonAudioFocusRequest(focus)
             if (lock.isHeld) lock.release()
             busy = false
-            if (porcupine == null) status("Ready — tap Talk")
+            if (wake == null) status("Ready — tap Talk")
         }
     }
 
@@ -187,8 +181,8 @@ class DozerService : Service() {
 
     override fun onDestroy() {
         running = false
-        try { porcupine?.stop(); porcupine?.delete() } catch (_: Exception) {}
-        porcupine = null
+        try { wake?.release() } catch (_: Exception) {}
+        wake = null
         tts?.shutdown()
         worker.shutdownNow()
         onStatus?.invoke("Stopped")

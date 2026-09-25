@@ -35,7 +35,7 @@ class MainActivity : Activity() {
             setText(v); isSingleLine = true
             if (secret) inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
         }
-        fun button(t: String, f: () -> Unit) = Button(this).apply { text = t; setOnClickListener { f() } }
+        fun button(t: String, f: (Button) -> Unit) = Button(this).apply { text = t; setOnClickListener { f(this) } }
 
         col.addView(TextView(this).apply { text = "Dozer"; textSize = 28f; setTypeface(null, Typeface.BOLD) })
         status = TextView(this).apply { text = if (DozerService.running) "Running" else "Stopped"; textSize = 16f }
@@ -44,15 +44,14 @@ class MainActivity : Activity() {
         listenBtn = button(if (prefs.listening) "Stop listening" else "Start listening") { toggleListening() }
         col.addView(listenBtn)
         col.addView(button("Talk now") { startSvc(DozerService.ACTION_TALK) })
+        col.addView(TextView(this).apply { text = "Say \"Hey Dozer\" (also: \"Hi Dozer\", \"OK Dozer\"). Works offline on the phone — no account needed." })
 
         col.addView(label("Server"))
         val server = field(prefs.server); col.addView(server)
         col.addView(label("Dozer token"))
         val token = field(prefs.token, true); col.addView(token)
-        col.addView(label("Picovoice AccessKey (wake word)"))
-        val pico = field(prefs.picoKey, true); col.addView(pico)
         col.addView(button("Save") {
-            prefs.server = server.text.toString(); prefs.token = token.text.toString(); prefs.picoKey = pico.text.toString()
+            prefs.server = server.text.toString(); prefs.token = token.text.toString()
             Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show()
             if (DozerService.running && prefs.listening) startSvc(DozerService.ACTION_START)
         })
@@ -62,9 +61,13 @@ class MainActivity : Activity() {
                 runOnUiThread { status.text = "Server: $r" }
             }.start()
         })
-        col.addView(button(if (DozerService.wakeWordFile(this).exists()) "Replace \"Hey Dozer\" wake word (.ppn)"
-                           else "Import \"Hey Dozer\" wake word (.ppn)") {
-            startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*"), 7)
+        col.addView(button("Wake word sensitivity: " + sensLabel()) {
+            prefs.sensitivity = when (prefs.sensitivity) { 0.25f -> 0.15f; 0.15f -> 0.35f; else -> 0.25f }
+            (it as Button).text = "Wake word sensitivity: " + sensLabel()
+            if (DozerService.running && prefs.listening) {
+                startService(Intent(this, DozerService::class.java).setAction(DozerService.ACTION_STOP))
+                window.decorView.postDelayed({ startSvc(DozerService.ACTION_START) }, 800)
+            }
         })
         col.addView(button("Allow running in background (battery)") {
             val pm = getSystemService(PowerManager::class.java)
@@ -109,6 +112,8 @@ class MainActivity : Activity() {
             listenBtn.text = "Stop listening"
         }
     }
+
+    private fun sensLabel() = when (prefs.sensitivity) { 0.15f -> "high"; 0.35f -> "low"; else -> "normal" }
 
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

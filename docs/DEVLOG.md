@@ -317,6 +317,17 @@ Decision (Isaac): not Discord voice notes — a real "Hey Dozer" wake word on th
   MainActivity — remove Picovoice key + .ppn import; app/build.gradle.kts — drop porcupine dependency,
   abiFilters arm64-v8a, versionCode 2 / versionName 1.1; build; DM APK v1.1.
 
+### 25 Sep ~15:30 UTC — App v1.1 (sherpa-onnx wake word)
+- Overnight: 04:00 backup OK (5.7 min, world-2026-09-25_0200.tar.gz; tar noted a file changing — harmless), 05:00 prune ran,
+  08:00 briefing sent.
+- DozerService: PorcupineManager replaced by WakeWord (stopped during recording/talk, restarted after); Talk action also
+  pauses it. MainActivity: Picovoice key + .ppn import removed; "Wake word sensitivity" button cycles
+  normal 0.25 / high 0.15 / low 0.35 (restarts the service). Porcupine dependency removed.
+- Gradle: versionCode 2 / 1.1, abiFilters arm64-v8a, legacy jni packaging, onnx not compressed.
+- APK 21.7 MB (onnxruntime 22 MB of it), signed with the same key (installs over 1.0). Too big for a bot DM (10 MB) ->
+  hosted at isaac-dev.eu/<random dl-dir>/Dozer-1.1.apk (dir name in data/apk_dl_dir), link DM'd.
+  Delete the dl dir once Isaac confirms install.
+
 ### Open for Isaac
 - [ ] Cloudflare DNS: A record dozer -> 69.6.57.87; install deploy/nginx-dozer.conf; certbot for dozer.isaac-dev.eu.
 - [ ] Install Dozer-1.0.apk, paste token + AccessKey, Test connection, Start listening, battery -> unrestricted.

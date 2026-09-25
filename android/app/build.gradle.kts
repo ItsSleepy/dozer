@@ -10,8 +10,9 @@ android {
         applicationId = "eu.isaacdev.dozer"
         minSdk = 29
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
+        ndk { abiFilters += listOf("arm64-v8a") }
     }
     signingConfigs {
         create("release") {
@@ -32,9 +33,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
+    packaging { jniLibs { useLegacyPackaging = true } }
+    androidResources { noCompress += listOf("onnx") }
 }
 
 dependencies {
-    implementation("ai.picovoice:porcupine-android:3.0.3")
     implementation("androidx.core:core-ktx:1.13.1")
 }
