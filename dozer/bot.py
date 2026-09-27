@@ -245,7 +245,10 @@ async def quote_hook(request: web.Request):
 def _voice_auth(request: web.Request) -> bool:
     ok = request.headers.get("Authorization", "") == f"Bearer {C.get('VOICE_TOKEN')}" and bool(C.get("VOICE_TOKEN"))
     if not ok:
-        audit("voice_rejected", path=request.path, remote=request.headers.get("X-Real-IP", request.remote))
+        got = request.headers.get("Authorization", "")
+        tok = got[7:] if got.startswith("Bearer ") else got
+        audit("voice_rejected", path=request.path, remote=request.headers.get("X-Real-IP", request.remote),
+              sent_len=len(tok), expected_len=len(C.get("VOICE_TOKEN")), has_bars="|" in tok, has_space=" " in tok.strip() or tok != tok.strip())
     return ok
 
 
@@ -345,8 +348,6 @@ async def handle(message: discord.Message):
     if r and r.tool == "schedule_toggle":
         ok = scheduler.set_enabled(r.args["jid"], r.args["on"])
         return await send(dest, ("Resumed." if r.args["on"] else "Paused.") if ok else "No such task.")
-    if r and r.label == "medal":
-        r.label = await tools.medal.describe_pick(**{k: v for k, v in r.args.items() if k in ("which", "game", "channel")})
     if r:
         if r.tool in tools.CONFIRM_TOOLS and not await confirm(dest, r.label or f"Run {r.tool}?"):
             return await send(dest, "Cancelled.")

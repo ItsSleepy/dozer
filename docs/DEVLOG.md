@@ -328,6 +328,15 @@ Decision (Isaac): not Discord voice notes — a real "Hey Dozer" wake word on th
   hosted at isaac-dev.eu/<random dl-dir>/Dozer-1.1.apk (dir name in data/apk_dl_dir), link DM'd.
   Delete the dl dir once Isaac confirms install.
 
+### 25 Sep — Medal clips removed (Isaac: Medal is on every device, the feature isn't needed)
+- Deleted dozer/medal.py; removed medal_clips/post_clip tools, schemas, prompt line, `clips` / `post clip` commands,
+  confirm-label handling, voice jargon fixes. Removed MEDAL_SESSION + MEDAL_USER_ID from .env.
+  Kept `launch medal` (opens the Medal desktop app via the PC agent). Code remains in git history.
+- Brain now has 40 tool schemas (fewer = better tool choice for the 14B model).
+- Phone app reached the server through Cloudflare (proxied) but got 401 — token mismatch, likely a bad copy of the
+  spoilered token. Resent the token as a standalone DM; voice_rejected now logs sent/expected token length (never the value).
+  Asked Isaac to switch the dozer DNS record to DNS-only (Cloudflare proxy has a 100 s limit).
+
 ### Open for Isaac
 - [ ] Cloudflare DNS: A record dozer -> 69.6.57.87; install deploy/nginx-dozer.conf; certbot for dozer.isaac-dev.eu.
 - [ ] Install Dozer-1.0.apk, paste token + AccessKey, Test connection, Start listening, battery -> unrestricted.

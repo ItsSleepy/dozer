@@ -14,7 +14,7 @@ from .commands import route
 
 MODELS = C.ROOT / "models"
 VOICE = C.get("PIPER_VOICE", "en_GB-alan-medium")
-HINT = ("Dozer, server, Minecraft, nginx, eugh, restart, backup, reminders, remind me, CS2, Medal, clip, faze_clipz, "
+HINT = ("Dozer, server, Minecraft, nginx, eugh, restart, backup, reminders, remind me, CS2, "
         "gaming PC, wake, Isaac, weather, sites, docker.")
 VOICE_RULES = ("You are speaking out loud to Isaac, possibly while he is driving. Reply in 1–3 short spoken sentences. "
                "No markdown, no lists, no links, no emojis. Numbers and times in words a person would say.")
@@ -50,10 +50,8 @@ async def warm_up():
 FIXES = [  # how Isaac's jargon sounds -> what he means
     (r"\bengine ?x\b|\bn ?jinx\b|\bengine ex\b", "nginx"),
     (r"\b(dosa|doza|dozers?|doze her|dose her)\b", "Dozer"),
-    (r"\bmetal (clip|clips)\b", r"medal \1"),
     (r"\b(p ?h ?p|php) ?(fpm|f p m)\b", "php8.5-fpm"),
     (r"\bc ?s ?2\b|\bcs two\b|\bcounter strike 2\b", "cs2"),
-    (r"\bfaze clips?\b|\bfaze clipz\b", "faze_clipz"),
     (r"\b(ugh|eww|yew)\b(?= server| service)", "eugh"),
 ]
 
@@ -166,8 +164,6 @@ async def respond(text: str) -> str:
             return "That one's easier in the chat. I'll leave it for when you're on your phone screen."
         if r and r.tool in tools.CONFIRM_TOOLS:
             q = re.sub(r"[*`]", "", r.label or f"Run {r.tool}?")
-            if r.label == "medal":
-                q = "Post that clip?"
             pending = {"kind": "tool", "tool": r.tool, "args": r.args, "question": q, "at": time.time()}
             return f"{q} Yes or no?"
         if r and r.tool in tools.REGISTRY:
