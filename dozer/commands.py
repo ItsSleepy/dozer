@@ -28,6 +28,9 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `docker` · `docker restart <name>` (asks) · `ls <path>` · `read <file> [lines]`
 `help` — this list
 
+**Discord**
+`send to general in tweakers: hello!` — posts as Dozer (asks first)
+
 **Web**
 `search <query>` — web results · `summarise <link> [focus on …]` / `tldr <link>` / just paste a link
 
@@ -45,6 +48,8 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 _P = [
     (r"^(help|commands|\?)$", lambda m: Route("help")),
     (r"^(please )?remind me .+$", lambda m: Route("remind", {"text": m[0]})),
+    (r"^(?:send|say|post)(?: a message)? (?:to |in )(?:#)?([\w-]+) (?:in|on) (bmw|tweakers?)[: ,-]+(.+)$",
+     lambda m: Route("send_message", {"server": m[2], "channel": m[1], "text": m[3]}, "discord")),
     (r"^(?:search|google|look up|lookup)\s+(.+)$", lambda m: Route("web_search", {"query": m[1]})),
     (r"^(?:summari[sz]e|tldr|tl;dr|sum up)\s+(?:this\s+)?(https?://\S+)(?:\s+(?:focus(?: on)?|about)\s+(.+))?$",
      lambda m: Route("summarise_url", {"url": m[1], "focus": m[2] or ""})),

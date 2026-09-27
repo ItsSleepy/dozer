@@ -290,15 +290,16 @@ REGISTRY = {
 }
 
 
-from . import ops, pcagent, reminders, memory, web  # noqa: E402  (after _run/UNIT_RE are defined)
+from . import ops, pcagent, reminders, memory, web, discordmsg  # noqa: E402  (after _run/UNIT_RE are defined)
 REGISTRY.update(ops.OPS)
 REGISTRY.update(pcagent.AGENT_TOOLS)
+REGISTRY.update({"send_message": discordmsg.send_message})
 REGISTRY.update({"web_search": web.web_search, "summarise_url": web.summarise_url})
 REGISTRY.update({"remember": memory.remember, "recall": memory.recall, "forget_memory": memory.forget,
                  "list_memories": memory.list_memories})
 REGISTRY.update({"set_reminder": reminders.set_reminder, "list_reminders": reminders.list_reminders,
                  "cancel_reminder": reminders.cancel_reminder, "snooze_reminder": reminders.snooze})
-CONFIRM_TOOLS |= ops.CONFIRM_OPS | {"forget_memory"} | pcagent.CONFIRM_AGENT
+CONFIRM_TOOLS |= ops.CONFIRM_OPS | {"forget_memory", "send_message"} | pcagent.CONFIRM_AGENT
 
 
 async def call(name: str, **args) -> str:

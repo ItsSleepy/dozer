@@ -337,6 +337,16 @@ Decision (Isaac): not Discord voice notes — a real "Hey Dozer" wake word on th
   spoilered token. Resent the token as a standalone DM; voice_rejected now logs sent/expected token length (never the value).
   Asked Isaac to switch the dozer DNS record to DNS-only (Cloudflare proxy has a 100 s limit).
 
+### 25 Sep 16:12–16:22 UTC — First real phone voice session (Isaac)
+- Token fixed (re-pasted from the standalone DM). Voice round trips 1.6–6.5 s (17.3 s first, brain loading).
+- Findings: Whisper misheard "Tweakers" ("2-acre", "TwiCales") and "Warzone" ("work-under"); Isaac asked Dozer to send
+  a hello to Tweakers #general — no tool existed, so the brain misused post_clip; the brain also asked "proceed?"
+  itself before the system's own yes/no (double confirmation).
+- Fixes: vocabulary hint + jargon fixes for Tweakers/BMW/Warzone/general chat; new dozer/discordmsg.py send_message
+  (confirm-gated, posts as Dozer, mentions disabled, server/channel matched ignoring emoji decorations,
+  e.g. "general" -> "🌸-·-general-·˚"); command `send to <channel> in <bmw|tweakers>: <text>`; voice rule: never ask for
+  confirmation yourself.
+
 ### Open for Isaac
 - [ ] Cloudflare DNS: A record dozer -> 69.6.57.87; install deploy/nginx-dozer.conf; certbot for dozer.isaac-dev.eu.
 - [ ] Install Dozer-1.0.apk, paste token + AccessKey, Test connection, Start listening, battery -> unrestricted.

@@ -323,6 +323,8 @@ async def handle(message: discord.Message):
         r = None                     # vague time ("after dinner") -> let the brain interpret it
     if r and r.label == "memory":
         r.label = f"Forget memory #{r.args['rid']}?"
+    if r and r.label == "discord":
+        r.label = await tools.discordmsg.describe(r.args["server"], r.args["channel"], r.args["text"])
     if r and r.tool == "forget_search":
         hits = tools.memory.matches_for_forget(r.args["text"])
         if not hits:

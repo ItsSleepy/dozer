@@ -14,9 +14,11 @@ from .commands import route
 
 MODELS = C.ROOT / "models"
 VOICE = C.get("PIPER_VOICE", "en_GB-alan-medium")
-HINT = ("Dozer, server, Minecraft, nginx, eugh, restart, backup, reminders, remind me, CS2, "
+HINT = ("Dozer, Tweakers, BMW, general chat, Warzone, server, Minecraft, nginx, eugh, restart, backup, reminders, remind me, CS2, "
         "gaming PC, wake, Isaac, weather, sites, docker.")
 VOICE_RULES = ("You are speaking out loud to Isaac, possibly while he is driving. Reply in 1–3 short spoken sentences. "
+               "When he asks you to do something, call the tool straight away — the system asks him yes or no itself, "
+               "so never ask for confirmation yourself. "
                "No markdown, no lists, no links, no emojis. Numbers and times in words a person would say.")
 YES = re.compile(r"^(yes|yeah|yep|yup|sure|ok(ay)?|do it|go ahead|confirm(ed)?|affirmative|please do)\b", re.I)
 NO = re.compile(r"^(no|nope|nah|cancel|stop|don'?t|never ?mind|abort)\b", re.I)
@@ -48,6 +50,8 @@ async def warm_up():
 
 
 FIXES = [  # how Isaac's jargon sounds -> what he means
+    (r"\b(2|two|to)[- ]?acre\b|\btwi ?cales\b|\btweekers\b|\btweaker'?s\b", "Tweakers"),
+    (r"\bwork[- ]?under\b|\bwar zone\b", "Warzone"),
     (r"\bengine ?x\b|\bn ?jinx\b|\bengine ex\b", "nginx"),
     (r"\b(dosa|doza|dozers?|doze her|dose her)\b", "Dozer"),
     (r"\b(p ?h ?p|php) ?(fpm|f p m)\b", "php8.5-fpm"),
@@ -162,8 +166,10 @@ async def respond(text: str) -> str:
             r = None
         if r and r.tool in ("schedules", "schedule_add", "schedule_remove", "schedule_toggle", "forget_search"):
             return "That one's easier in the chat. I'll leave it for when you're on your phone screen."
+        if r and r.label == "discord":
+            r.label = await tools.discordmsg.describe(r.args["server"], r.args["channel"], r.args["text"])
         if r and r.tool in tools.CONFIRM_TOOLS:
-            q = re.sub(r"[*`]", "", r.label or f"Run {r.tool}?")
+            q = re.sub(r"[*`>]", "", r.label or f"Run {r.tool}?")
             pending = {"kind": "tool", "tool": r.tool, "args": r.args, "question": q, "at": time.time()}
             return f"{q} Yes or no?"
         if r and r.tool in tools.REGISTRY:
