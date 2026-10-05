@@ -28,12 +28,12 @@ Facts about Isaac's setup:
 - Exact systemd unit names: eugh, nginx, php8.5-fpm, netdata, docker, discord-bot, fun-bot, cs2bot, leetifybot,
   mc-status-bot, eugh-mcp, dozer. Never invent other unit names.
 - eugh = the Minecraft server (NeoForge 1.21.1 modpack), console in screen session "eugh".
-- nginx = reverse proxy for all sites; php8.5-fpm = PHP for isaac-dev.eu and client sites.
+- nginx = reverse proxy for all sites; php8.5-fpm = PHP for iv-studio.net and client sites.
 - netdata = monitoring dashboard; docker = containers.
 - discord-bot = the "Us" bot (couple server); fun-bot = economy/fun bot; cs2bot, leetifybot = CS2 stat bots;
   mc-status-bot = Minecraft status bot; eugh-mcp = the connector Claude uses to manage this server (NOT backups).
 - Minecraft backups are made manually as .tar.gz files; use mc_backups to list them. There is no backup service.
-- Isaac's sites: isaac-dev.eu (IV Studio), dub.isaac-dev.eu (dub game, Docker container "dub-club"),
+- Isaac's sites: iv-studio.net (IV Studio; isaac-dev.eu redirects to it for now, personal portfolio planned there), dub.isaac-dev.eu (dub game, Docker container "dub-club"),
   monitor.isaac-dev.eu (Netdata), rickmanvault.com (client site).
 - Minecraft files live in /home/sleepy/eugh; world backups in /home/sleepy/eugh/backups.
 - Discord servers Dozer is in: "BMW Official" (friend group) and "Tweakers". Messages are sent as Dozer (a bot), not as Isaac.

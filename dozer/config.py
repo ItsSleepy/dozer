@@ -36,6 +36,18 @@ WOL_BROADCAST = get("WOL_BROADCAST", "255.255.255.255")
 US_API_URL = get("US_API_URL", "http://127.0.0.1:8081/api/action")
 US_API_SECRET = get("US_API_SECRET")
 HOOK_PORT = int(get("HOOK_PORT", "8095"))
+# Phone-app API (/api/voice, /api/text, /api/ping). Off = Discord DMs are the only interface.
+# Set MOBILE_API=1 in .env to bring it back.
+MOBILE_API = get("MOBILE_API", "0") == "1"
+# DNS-only hostnames that point straight at the home IP; watched for IP drift.
+DDNS_WATCHED_HOSTS = ["mc.isaac-dev.eu", "mcp.isaac-dev.eu", "origin.isaac-dev.eu"]
+# Websites loaded every 2 minutes. Down = no answer, timeout, HTTP 5xx/522, or a 4xx other than 401/403.
+WATCHED_SITES = {
+    "IV Studio": "https://iv-studio.net/",
+    "Rickman Vault": "https://rickmanvault.com/",
+    "Portfolio (isaac-dev.eu)": "https://isaac-dev.eu/",
+    "Dub": "https://dub.isaac-dev.eu/",
+}
 HOOK_SECRET = get("HOOK_SECRET")
 TZ_NAME = get("TZ_NAME", "Europe/Malta")
 WEATHER_LAT = float(get("WEATHER_LAT", "35.856"))
@@ -45,7 +57,7 @@ BRIEFING_TIME = get("BRIEFING_TIME", "08:00")
 # Services Dozer watches and reports on.
 WATCHED_SERVICES = [
     "eugh", "nginx", "php8.5-fpm", "netdata", "docker",
-    "discord-bot", "fun-bot", "cs2bot", "leetifybot", "mc-status-bot", "eugh-mcp",
+    "discord-bot", "fun-bot", "cs2bot", "leetifybot", "mc-status-bot", "eugh-mcp", "portfolio",
 ]
 # Restartable today via the existing sudoers allowlist.
 SUDO_RESTART_OK = {"eugh", "nginx", "php8.3-fpm"}

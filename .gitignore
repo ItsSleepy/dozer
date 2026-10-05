@@ -12,3 +12,32 @@ android/.tmp/
 *.jks
 android/app/src/main/jniLibs/
 android/app/src/main/assets/kws/
+# --- secrets / environment ---
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+upload-key
+# --- dependencies / build output ---
+node_modules/
+.venv/
+*.pyc
+.next/
+dist/
+build/
+# --- runtime state, logs, local data ---
+*.log
+*.db
+*.db-shm
+*.db-wal
+*.sqlite*
+sessions/
+# --- backups and one-off leftovers ---
+*.bak
+*.bak-*
+*.bak.*
+*.prepresence
+*.tar.gz
+*.zip
+.DS_Store

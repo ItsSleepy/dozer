@@ -16,7 +16,7 @@ from .tools import _run, UNIT_RE
 
 MC_DIR = Path("/home/sleepy/eugh")
 BACKUP_DIR = MC_DIR / "backups"
-SITES = ["isaac-dev.eu", "dub.isaac-dev.eu", "monitor.isaac-dev.eu", "rickmanvault.com"]
+SITES = ["iv-studio.net", "isaac-dev.eu", "dub.isaac-dev.eu", "monitor.isaac-dev.eu", "rickmanvault.com"]
 READ_ROOTS = [Path("/home/sleepy"), Path("/var/www"), Path("/etc/nginx"), Path("/etc/systemd/system")]
 SECRET_HINTS = (".env", "secret", "token", "password", "passwd", ".key", ".pem", "id_rsa", "id_ed25519",
                 "credentials", "mcp.isaac-dev.eu", "/.ssh", "/.git/")

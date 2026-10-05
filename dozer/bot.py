@@ -1,12 +1,14 @@
 """Dozer v1 — Discord DM interface, confirmations, watchdog, briefing, webhook."""
 import asyncio
+import socket
+import time
 from collections import deque
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import discord
 import psutil
-from aiohttp import web
+from aiohttp import ClientSession, ClientTimeout, web
 
 from . import config as C
 from . import llm, reminders, scheduler, tools
@@ -227,6 +229,101 @@ async def watchdog_loop():
             audit("error", where="watchdog", error=repr(e))
 
 
+# ── public IP / DNS watch ───────────────────────────────────────────────────
+
+async def _public_ip() -> str | None:
+    try:
+        async with ClientSession(timeout=ClientTimeout(total=8)) as s:
+            async with s.get("https://api.ipify.org") as r:
+                ip = (await r.text()).strip()
+                return ip if ip.count(".") == 3 else None
+    except Exception:
+        return None
+
+
+async def _resolve(host: str) -> str | None:
+    try:
+        return await asyncio.get_running_loop().run_in_executor(None, socket.gethostbyname, host)
+    except Exception:
+        return None
+
+
+async def ip_watch_loop():
+    """DM when the home public IP changes, and again once the DNS-only records
+    (mc, mcp) match it. ~/cf-ddns-extra.sh updates them every 5 minutes."""
+    last_ip = await _public_ip()
+    drifted_since = None
+    still_alerted = False
+    audit("ip_watch_start", ip=last_ip)
+    while True:
+        await asyncio.sleep(300)
+        try:
+            ip = await _public_ip()
+            if not ip:
+                continue  # offline or ipify unreachable: nothing to compare against
+            if last_ip is not None and ip != last_ip:
+                await alert(f"Public IP changed {last_ip} → {ip}. mc / mcp DNS should follow within ~5 min.")
+                last_ip = ip
+                drifted_since = drifted_since or time.time()
+                still_alerted = False
+            last_ip = last_ip or ip
+            stale = []
+            for h in C.DDNS_WATCHED_HOSTS:
+                r = await _resolve(h)
+                if r != ip:
+                    stale.append(f"{h} → {r or 'no answer'}")
+            if stale:
+                if drifted_since is None:
+                    drifted_since = time.time()
+                    await alert(f"DNS out of sync with {ip}: " + ", ".join(stale))
+                elif time.time() - drifted_since > 900 and not still_alerted:
+                    still_alerted = True
+                    await alert("Still out of sync after 15 min, check the DDNS cron "
+                                "(~/cf-ddns-extra.log): " + ", ".join(stale))
+            elif drifted_since is not None:
+                drifted_since = None
+                still_alerted = False
+                await alert(f"✅ DNS back in sync with {ip} ({', '.join(h.split('.')[0] for h in C.DDNS_WATCHED_HOSTS)}).")
+        except Exception as e:
+            audit("error", where="ip_watch", error=repr(e))
+
+
+# ── website watch ───────────────────────────────────────────────────────────
+
+async def _site_status(url: str) -> tuple[bool, str]:
+    try:
+        async with ClientSession(timeout=ClientTimeout(total=30)) as s:
+            async with s.get(url, allow_redirects=True) as r:
+                bad = r.status >= 400 and r.status not in (401, 403)
+                return (not bad), f"HTTP {r.status}"
+    except asyncio.TimeoutError:
+        return False, "timed out"
+    except Exception as e:
+        return False, e.__class__.__name__
+
+
+async def site_watch_loop():
+    """DM when a website stops loading (5xx, Cloudflare 522, timeout, DNS failure)
+    and again when it recovers. Two failed checks in a row, so one blip doesn't page you."""
+    fails = {n: 0 for n in C.WATCHED_SITES}
+    down = {n: False for n in C.WATCHED_SITES}
+    audit("site_watch_start", sites=list(C.WATCHED_SITES))
+    while True:
+        await asyncio.sleep(120)
+        try:
+            results = await asyncio.gather(*(_site_status(u) for u in C.WATCHED_SITES.values()))
+            for (name, url), (ok, detail) in zip(C.WATCHED_SITES.items(), results):
+                fails[name] = 0 if ok else fails[name] + 1
+                if fails[name] >= 2 and not down[name]:
+                    down[name] = True
+                    await alert(f"🌐 **{name}** isn't loading ({detail}): {url}")
+                elif ok and down[name]:
+                    down[name] = False
+                    await alert(f"🌐 **{name}** is back up.")
+        except Exception as e:
+            audit("error", where="site_watch", error=repr(e))
+
+
 # ── quote webhook (called by isaac-dev.eu api/send-quote.php) ───────────────
 
 async def quote_hook(request: web.Request):
@@ -295,9 +392,10 @@ async def api_ping(request: web.Request):
 async def start_webhook():
     app = web.Application(client_max_size=8_500_000)
     app.router.add_post("/hooks/quote", quote_hook)
-    app.router.add_post("/api/voice", api_voice)
-    app.router.add_post("/api/text", api_text)
-    app.router.add_get("/api/ping", api_ping)
+    if C.MOBILE_API:
+        app.router.add_post("/api/voice", api_voice)
+        app.router.add_post("/api/text", api_text)
+        app.router.add_get("/api/ping", api_ping)
     runner = web.AppRunner(app)
     await runner.setup()
     await web.TCPSite(runner, "127.0.0.1", C.HOOK_PORT).start()
@@ -394,6 +492,8 @@ async def on_ready():
         asyncio.create_task(tools.pcagent.loop())
         asyncio.create_task(scheduler.loop())
         asyncio.create_task(watchdog_loop())
+        asyncio.create_task(ip_watch_loop())
+        asyncio.create_task(site_watch_loop())
         asyncio.create_task(briefing_loop())
         await start_webhook()
         await dm("🟢 Dozer v1 is online. Type `help` for commands.")
