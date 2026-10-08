@@ -56,7 +56,7 @@ BRIEFING_TIME = get("BRIEFING_TIME", "08:00")
 
 # Services Dozer watches and reports on.
 WATCHED_SERVICES = [
-    "eugh", "nginx", "php8.5-fpm", "netdata", "docker",
+    "mc-vanilla", "mc-party", "nginx", "php8.5-fpm", "netdata", "docker",
     "discord-bot", "fun-bot", "cs2bot", "leetifybot", "mc-status-bot", "eugh-mcp", "portfolio",
 ]
 # Restartable today via the existing sudoers allowlist.
