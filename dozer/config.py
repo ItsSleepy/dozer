@@ -56,7 +56,7 @@ BRIEFING_TIME = get("BRIEFING_TIME", "08:00")
 
 # Services Dozer watches and reports on.
 WATCHED_SERVICES = [
-    "mc-vanilla", "mc-party", "nginx", "php8.5-fpm", "netdata", "docker",
+    "mc-atm10", "nginx", "php8.5-fpm", "netdata", "docker",
     "discord-bot", "fun-bot", "cs2bot", "leetifybot", "mc-status-bot", "eugh-mcp", "portfolio",
 ]
 # Restartable today via the existing sudoers allowlist.
@@ -65,5 +65,8 @@ SUDO_RESTART_OK = {"eugh", "nginx", "php8.3-fpm"}
 RESTART_WRAPPER = "/usr/local/bin/dozer-restart"
 
 DISK_ALERT_PCT = 90
-MC_LOG = Path("/home/sleepy/eugh/logs/latest.log")
-MC_SCREEN = "eugh"
+# The Minecraft server Dozer manages (ATM10 "To the Sky" since Oct 2026; was "eugh")
+MC_UNIT = get("MC_UNIT", "mc-atm10")
+MC_DIR = Path(get("MC_DIR", "/home/sleepy/mc/atm10"))
+MC_LOG = MC_DIR / "logs" / "latest.log"
+MC_SCREEN = get("MC_SCREEN", MC_UNIT)

@@ -27,7 +27,7 @@ Rules:
 Facts about Isaac's setup:
 - Exact systemd unit names: eugh, nginx, php8.5-fpm, netdata, docker, discord-bot, fun-bot, cs2bot, leetifybot,
   mc-status-bot, eugh-mcp, dozer. Never invent other unit names.
-- eugh = the Minecraft server (NeoForge 1.21.1 modpack), console in screen session "eugh".
+- mc-atm10 = the Minecraft server (All the Mods 10 "To the Sky", NeoForge 1.21.1), console in screen session "mc-atm10". The old "eugh" server is archived.
 - nginx = reverse proxy for all sites; php8.5-fpm = PHP for iv-studio.net and client sites.
 - netdata = monitoring dashboard; docker = containers.
 - discord-bot = the "Us" bot (couple server); fun-bot = economy/fun bot; cs2bot, leetifybot = CS2 stat bots;

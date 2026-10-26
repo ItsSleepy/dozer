@@ -80,10 +80,10 @@ async def get_logs(unit: str, lines: int = 20) -> str:
 
 
 async def mc_status() -> str:
-    _, active = await _run("systemctl", "is-active", "eugh")
+    _, active = await _run("systemctl", "is-active", C.MC_UNIT)
     _, ports = await _run("ss", "-tln")
     listening = ":25565" in ports
-    return f"Minecraft (eugh): {active}, {'listening on 25565' if listening else 'NOT listening on 25565'}"
+    return f"Minecraft ({C.MC_UNIT}): {active}, {'listening on 25565' if listening else 'NOT listening on 25565'}"
 
 
 async def mc_console(cmd: str) -> str:
@@ -114,7 +114,7 @@ async def mc_restart() -> str:
     """Graceful restart: save via RCON, stop via RCON, wait for exit, start. Works even after a Java update."""
     from . import rcon
     if not await rcon.available():
-        code, out = await _run("sudo", "-n", "systemctl", "restart", "eugh", timeout=180)
+        code, out = await _run("sudo", "-n", C.RESTART_WRAPPER, C.MC_UNIT, timeout=180)
         return ("Restarted via systemd (RCON not available yet — this restart turns it on)."
                 if code == 0 else f"Restart failed: {out[-300:]}")
     await rcon.command("say Server restarting in 10 seconds")
@@ -123,12 +123,12 @@ async def mc_restart() -> str:
     await rcon.command("stop")
     for _ in range(60):                                   # up to 2 min for a clean exit
         await asyncio.sleep(2)
-        _, st = await _run("systemctl", "is-active", "eugh")
+        _, st = await _run("systemctl", "is-active", C.MC_UNIT)
         if st.strip() in ("inactive", "failed", "activating"):
             break
-    _, st = await _run("systemctl", "is-active", "eugh")
+    _, st = await _run("systemctl", "is-active", C.MC_UNIT)
     if st.strip() != "active":
-        code, out = await _run("sudo", "-n", "systemctl", "start", "eugh", timeout=60)
+        code, out = await _run("sudo", "-n", C.RESTART_WRAPPER, C.MC_UNIT, timeout=60)
         if code != 0:
             return f"Saved and stopped cleanly, but start failed: {out[-300:]}"
     return "Minecraft saved, stopped cleanly and started again (takes ~1–2 min to be joinable)."
@@ -223,7 +223,7 @@ async def weather() -> str:
 async def restart_service(unit: str) -> str:
     if not UNIT_RE.match(unit):
         return "Invalid unit name."
-    if unit == "eugh":
+    if unit in (C.MC_UNIT, "eugh"):
         return await mc_restart()           # always the graceful path for Minecraft
     if unit in C.SUDO_RESTART_OK:
         code, out = await _run("sudo", "-n", "systemctl", "restart", unit, timeout=120)

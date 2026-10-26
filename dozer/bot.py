@@ -151,6 +151,20 @@ def backup_age_line() -> str:
 
 # ── briefing ────────────────────────────────────────────────────────────────
 
+INBOX_BRIEF = C.ROOT / "data" / "inbox_brief.md"   # written each weekday morning by Claude (Gmail + Calendar)
+
+
+def inbox_brief() -> str:
+    """Today's email/calendar summary from Claude's morning run, or "" if there isn't a fresh one."""
+    try:
+        st = INBOX_BRIEF.stat()
+        if datetime.fromtimestamp(st.st_mtime, TZ).date() != datetime.now(TZ).date():
+            return ""
+        return INBOX_BRIEF.read_text(encoding="utf-8").strip()[:1500]
+    except OSError:
+        return ""
+
+
 async def briefing_text() -> str:
     now = datetime.now(TZ)
     states = await tools.service_states()
@@ -158,6 +172,7 @@ async def briefing_text() -> str:
     parts = [
         f"☀️ **Morning briefing — {now:%A %d %B}**",
         f"**Weather:** {await tools.weather()}",
+        *([f"**Calendar & inbox:**\n{inbox_brief()}"] if inbox_brief() else []),
         f"**Box:**\n{await tools.get_health()}",
         f"**Services:** {'all up' if not down else 'down: ' + ', '.join(down)}",
         f"**Minecraft:** {await tools.mc_status()}",
@@ -339,6 +354,21 @@ async def quote_hook(request: web.Request):
     return web.json_response({"ok": True})
 
 
+# ── generic notification webhook (isaac-dev.eu access requests, etc.) ───────
+
+async def notify_hook(request: web.Request):
+    if request.headers.get("X-Dozer-Secret") != C.HOOK_SECRET or not C.HOOK_SECRET:
+        audit("webhook_rejected", path="/hooks/notify", remote=request.remote)
+        return web.json_response({"ok": False}, status=403)
+    data = await request.json()
+    text = str(data.get("text", "")).strip()[:1800]
+    if not text:
+        return web.json_response({"ok": False}, status=400)
+    audit("webhook_notify", text=text)
+    await dm(text)
+    return web.json_response({"ok": True})
+
+
 def _voice_auth(request: web.Request) -> bool:
     ok = request.headers.get("Authorization", "") == f"Bearer {C.get('VOICE_TOKEN')}" and bool(C.get("VOICE_TOKEN"))
     if not ok:
@@ -352,7 +382,7 @@ def _voice_auth(request: web.Request) -> bool:
 async def _voice_reply(transcript: str, reply: str, speak: bool = True) -> web.Response:
     import base64
     from . import voice
-    audio = base64.b64encode(await voice.synthesize(reply)).decode() if speak else None
+    audio = (base64.b64encode(await voice.synthesize(reply)).decode() or None) if speak else None
     audit("voice_reply", transcript=transcript, reply=reply)
     return web.json_response({"ok": True, "transcript": transcript, "reply": reply,
                               "speech": voice.speakable(reply), "audio_wav_b64": audio})
@@ -392,6 +422,7 @@ async def api_ping(request: web.Request):
 async def start_webhook():
     app = web.Application(client_max_size=8_500_000)
     app.router.add_post("/hooks/quote", quote_hook)
+    app.router.add_post("/hooks/notify", notify_hook)
     if C.MOBILE_API:
         app.router.add_post("/api/voice", api_voice)
         app.router.add_post("/api/text", api_text)

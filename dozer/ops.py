@@ -2,6 +2,7 @@
 Debugging, config edits and scripts stay with Claude by design."""
 import asyncio
 import re
+import shutil
 import socket
 import ssl
 import time
@@ -11,10 +12,11 @@ from pathlib import Path
 import aiohttp
 import psutil
 
+from . import config as C
 from .audit import audit
 from .tools import _run, UNIT_RE
 
-MC_DIR = Path("/home/sleepy/eugh")
+MC_DIR = C.MC_DIR
 BACKUP_DIR = MC_DIR / "backups"
 SITES = ["iv-studio.net", "isaac-dev.eu", "dub.isaac-dev.eu", "monitor.isaac-dev.eu", "rickmanvault.com"]
 READ_ROOTS = [Path("/home/sleepy"), Path("/var/www"), Path("/etc/nginx"), Path("/etc/systemd/system")]
@@ -83,7 +85,9 @@ async def _do_backup():
 
 
 async def mc_start() -> str:
-    code, out = await _run("sudo", "-n", "systemctl", "start", "eugh", timeout=60)
+    code, out = await _run("sudo", "-n", "systemctl", "start", C.MC_UNIT, timeout=60)
+    if code != 0 and shutil.which(C.RESTART_WRAPPER):   # restarting a stopped unit starts it
+        code, out = await _run("sudo", "-n", C.RESTART_WRAPPER, C.MC_UNIT, timeout=60)
     return "Minecraft server starting." if code == 0 else f"Start failed: {out[-300:]}"
 
 
@@ -91,7 +95,7 @@ async def mc_stop() -> str:
     from . import rcon
     if await rcon.available():
         await rcon.command("save-all flush", timeout=60)
-    code, out = await _run("sudo", "-n", "systemctl", "stop", "eugh", timeout=180)
+    code, out = await _run("sudo", "-n", "systemctl", "stop", C.MC_UNIT, timeout=180)
     return "Minecraft server stopped." if code == 0 else f"Stop failed: {out[-300:]}"
 
 

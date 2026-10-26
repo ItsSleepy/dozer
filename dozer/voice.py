@@ -38,7 +38,8 @@ def _load():
         from faster_whisper import WhisperModel
         _stt = WhisperModel(C.get("WHISPER_MODEL", "base.en"), device="cpu", compute_type="int8",
                             download_root=str(MODELS / "whisper"), cpu_threads=8)
-    if _tts is None:
+    # spoken replies are optional: without the Piper voice files Dozer answers in text only
+    if _tts is None and (MODELS / "piper" / f"{VOICE}.onnx.json").exists():
         from piper import PiperVoice
         _tts = PiperVoice.load(str(MODELS / "piper" / f"{VOICE}.onnx"))
 
@@ -89,6 +90,8 @@ def speakable(text: str) -> str:
 
 async def synthesize(text: str) -> bytes:
     await asyncio.to_thread(_load)
+    if _tts is None:
+        return b""                      # no voice installed: the app shows the text reply
 
     def run():
         buf = io.BytesIO()
