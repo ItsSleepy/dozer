@@ -21,6 +21,10 @@ HELP = """**Dozer v1 — fixed commands** (anything else goes to the brain)
 `backups` — Minecraft backups · `weather` · `briefing` — morning briefing now
 `idea <text>` — add to the ideas tracker
 
+**IV Studio & CS2**
+`leads` — lead pipeline · `leads due` — follow-ups · `lead <name>` — one lead
+`cs2` — your last match + 30-day form · `cs2 <friend>` — theirs
+
 **Small ops**
 `backup` — world backup now (asks) · `prune backups [keep N]` (asks)
 `start mc` / `stop mc` (asks) · `whitelist` · `whitelist add|remove <name>` (asks)
@@ -106,6 +110,11 @@ _P = [
     (r"^(cat|read) (\S+)(?: (\d+))?$", lambda m: Route("read_file", {"path": m[2], "lines": int(m[3] or 40)})),
     (r"^briefing$", lambda m: Route("briefing")),
     (r"^idea (.+)$", lambda m: Route("add_idea", {"text": m[1]})),
+    (r"^(leads|iv leads|clients)\??$", lambda m: Route("leads_summary")),
+    (r"^(leads due|follow ?ups?|who do i follow up( with)?)\??$", lambda m: Route("leads_due")),
+    (r"^lead (.+)$", lambda m: Route("lead_info", {"name": m[1]})),
+    (r"^(cs2|cs|my stats|last match)\??$", lambda m: Route("cs2_summary")),
+    (r"^cs2? (.+)$", lambda m: Route("cs2_summary", {"name": m[1]})),
 ]
 PATTERNS = [(re.compile(p, re.I), f) for p, f in _P]
 

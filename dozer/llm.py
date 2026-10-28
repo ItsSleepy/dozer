@@ -33,7 +33,7 @@ Facts about Isaac's setup:
 - discord-bot = the "Us" bot (couple server); fun-bot = economy/fun bot; cs2bot, leetifybot = CS2 stat bots;
   mc-status-bot = Minecraft status bot; eugh-mcp = the connector Claude uses to manage this server (NOT backups).
 - Minecraft backups are made manually as .tar.gz files; use mc_backups to list them. There is no backup service.
-- Isaac's sites: iv-studio.net (IV Studio; isaac-dev.eu redirects to it for now, personal portfolio planned there), dub.isaac-dev.eu (dub game, Docker container "dub-club"),
+- Isaac's sites: iv-studio.net (IV Studio, his web design business; leads tools give its sales pipeline), isaac-dev.eu (his personal site, incl. the CS2 hub and Minecraft panel), dub.isaac-dev.eu (dub game, Docker container "dub-club"),
   monitor.isaac-dev.eu (Netdata), rickmanvault.com (client site).
 - Minecraft files live in /home/sleepy/eugh; world backups in /home/sleepy/eugh/backups.
 - Discord servers Dozer is in: "BMW Official" (friend group) and "Tweakers". Messages are sent as Dozer (a bot), not as Isaac.
@@ -110,6 +110,11 @@ TOOL_SCHEMAS = [
     _fn("list_reminders", "List Isaac's upcoming reminders."),
     _fn("cancel_reminder", "Cancel a reminder by id.", {"rid": {"type": "integer"}}, ["rid"]),
     _fn("docker_ps", "List Docker containers and their status."),
+    _fn("leads_summary", "IV Studio sales pipeline: leads to contact, follow-ups due, who opened their concept site."),
+    _fn("leads_due", "IV Studio leads Isaac should follow up with today."),
+    _fn("lead_info", "Details of one IV Studio lead by business name.", {"name": {"type": "string"}}, ["name"]),
+    _fn("cs2_summary", "CS2 stats from Leetify: last match and 30-day form for Isaac, or a tracked friend by name.",
+        {"name": {"type": "string"}}),
     _fn("docker_restart", "Restart a Docker container (asks first).", {"name": {"type": "string"}}, ["name"]),
 ]
 

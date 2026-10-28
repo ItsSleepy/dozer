@@ -11,7 +11,7 @@ import psutil
 from aiohttp import ClientSession, ClientTimeout, web
 
 from . import config as C
-from . import llm, reminders, scheduler, tools
+from . import biz, llm, reminders, scheduler, tools
 from .audit import audit, log
 from .commands import HELP, route
 
@@ -173,6 +173,7 @@ async def briefing_text() -> str:
         f"☀️ **Morning briefing — {now:%A %d %B}**",
         f"**Weather:** {await tools.weather()}",
         *([f"**Calendar & inbox:**\n{inbox_brief()}"] if inbox_brief() else []),
+        *([f"**IV Studio:** {lb}"] if (lb := await biz.leads_brief()) else []),
         f"**Box:**\n{await tools.get_health()}",
         f"**Services:** {'all up' if not down else 'down: ' + ', '.join(down)}",
         f"**Minecraft:** {await tools.mc_status()}",
@@ -526,6 +527,9 @@ async def on_ready():
         asyncio.create_task(ip_watch_loop())
         asyncio.create_task(site_watch_loop())
         asyncio.create_task(briefing_loop())
+        biz.set_notifier(dm)
+        asyncio.create_task(biz.lead_watch_loop())
+        asyncio.create_task(biz.cs2_loop())
         await start_webhook()
         await dm("🟢 Dozer v1 is online. Type `help` for commands.")
 

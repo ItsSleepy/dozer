@@ -290,7 +290,8 @@ REGISTRY = {
 }
 
 
-from . import ops, pcagent, reminders, memory, web, discordmsg  # noqa: E402  (after _run/UNIT_RE are defined)
+from . import ops, pcagent, reminders, memory, web, discordmsg, biz  # noqa: E402  (after _run/UNIT_RE are defined)
+REGISTRY.update(biz.TOOLS)
 REGISTRY.update(ops.OPS)
 REGISTRY.update(pcagent.AGENT_TOOLS)
 REGISTRY.update({"send_message": discordmsg.send_message})
